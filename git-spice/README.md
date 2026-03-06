@@ -25,7 +25,7 @@ The skill covers 11 areas:
 ## Install
 
 ```bash
-npx skills add https://github.com/detailobsessed/git-spice --skill git-spice
+npx skills add https://github.com/detailobsessed/agent-skills --skill git-spice
 ```
 
 ## License

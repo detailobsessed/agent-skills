@@ -28,7 +28,7 @@ The skill covers 11 areas of MCP server development:
 ## Install
 
 ```bash
-npx skills add https://github.com/detailobsessed/wise-mcp --skill wise-mcp
+npx skills add https://github.com/detailobsessed/agent-skills --skill wise-mcp
 ```
 
 ## Development
