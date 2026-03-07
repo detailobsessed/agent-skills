@@ -54,7 +54,7 @@ Know whether each tool is a query, command, or discovery tool. This classificati
 
 - **Query tools** are read-only, safe to retry, and their results can be cached. Mark them clearly so agents know they're side-effect-free. *(see: QUERY_TOOL)*
 - **Command tools** perform actions with side effects. Document what changes, whether the operation is reversible, and whether confirmation is needed for destructive actions. *(see: COMMAND_TOOL)*
-- **Discovery tools** reveal available operations, schemas, or capabilities. Examples: `list_tables()`, `describe_schema()`, `get_capabilities()`. These are essential for agents working with dynamic or unfamiliar data. *(see: DISCOVERY_TOOL)*
+- **Discovery tools** reveal available operations, schemas, or capabilities. Examples: `list_tables()`, `describe_schema()`, `search_tools()`. These are essential for agents working with dynamic or unfamiliar data. With FastMCP 3.1.0+, `BM25SearchTransform` generates a `search_tools` discovery tool automatically — prefer that over hand-written discovery tools for large catalogs. *(see: DISCOVERY_TOOL)*
 
 #### Write LLM-optimized descriptions
 
@@ -240,9 +240,58 @@ FastMCP v3.0 uses providers to source components from different origins:
 Transforms modify components after provider aggregation:
 
 - **Namespace** — adds prefixes to avoid naming conflicts between mounted servers
-- **Visibility** — controls which components are exposed to clients. Use to hide internal or administrative tools.
+- **Visibility** — controls which components are exposed to clients. Use to hide internal or administrative tools. See *Progressive disclosure* below for a full pattern.
 - **VersionFilter** — filters components by version ranges for API evolution
 - **ResourcesAsTools / PromptsAsTools** — exposes resources and prompts as tools for clients that primarily interact via tools
+- **BM25SearchTransform / RegexSearchTransform** *(FastMCP 3.1.0+)* — replaces `list_tools()` with `search_tools` + `call_tool` synthetic tools for large catalogs. BM25 ranks results by relevance; regex uses pattern matching. Use `always_visible` to pin tools that should always appear in `list_tools`. Preferred over the manual Visibility + gateway pattern for most cases — see *Progressive disclosure* below.
+
+#### Progressive disclosure
+
+When a server has many tools (10+), exposing all of them at startup wastes context window and degrades agent tool-selection accuracy. FastMCP 3.1.0+ provides two approaches.
+
+**Preferred: Search transforms (FastMCP 3.1.0+)**
+
+Use `BM25SearchTransform` or `RegexSearchTransform` to replace `list_tools()` with a minimal interface. Pin the tools agents need immediately with `always_visible`; everything else is discoverable on demand.
+
+```python
+from fastmcp.server.transforms.search import BM25SearchTransform
+
+# After mounting all sub-servers:
+mcp.add_transform(BM25SearchTransform(
+    max_results=8,
+    always_visible=["set_tenant", "search_plans", "run_plan", "wait_for_execution"],
+))
+# list_tools() now returns: always_visible tools + search_tools + call_tool
+```
+
+`search_tools(query=...)` returns ranked results with full parameter schemas. `call_tool(name=..., arguments={...})` invokes any discovered tool. Hidden tools remain **directly callable** — the transform controls discovery, not access.
+
+This approach is client-safe: `always_visible` tools are always in `list_tools` regardless of whether the client supports `ToolListChangedNotification`.
+
+**Alternative: Visibility + gateway (manual, pre-3.1.0)**
+
+For cases where you need category-based opt-in rather than search:
+
+```python
+from fastmcp.server.transforms import Visibility
+
+@server.tool(tags={"gateway"})
+def get_capabilities() -> dict: ...          # always visible
+
+@server.tool(tags={"gateway"})
+async def enable_tools(category: str, ctx: Context) -> dict: ...  # always visible
+
+@server.tool(tags={"plans"})
+def search_plans(...) -> dict: ...           # hidden until activated
+
+# Hide all tools, then re-show gateway
+mcp.add_transform(Visibility(False, components={"tool"}))
+mcp.add_transform(Visibility(True, tags={"gateway"}, components={"tool"}))
+```
+
+**Caution:** `match_all=True` short-circuits the `components` filter — always use two separate transforms as shown, not a single `Visibility(False, match_all=True, components={"tool"})`.
+
+**Client compatibility note:** `ToolListChangedNotification` (sent after `enable_components()`) is optional and many clients don't implement it. If you can't guarantee client support, return activated tool schemas directly from `enable_tools()` so agents have immediate usability without waiting for a tool list refresh. This is the main reason to prefer the search transform approach — `always_visible` avoids this problem entirely.
 
 #### Design principles for composition
 

@@ -1,6 +1,6 @@
 # agent-skills
 
-My personal collection of [agent skills]()https://skills.sh/) I created and maintain.
+My personal collection of [agent skills](https://skills.sh/) I created and maintain.
 
 ## Skills
 
