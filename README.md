@@ -4,6 +4,9 @@ My personal collection of [agent skills](https://skills.sh/) I created and maint
 
 ## Skills
 
+### `macos-expert`
+Source-backed macOS app development guidance covering Apple HIG expectations, SwiftUI, AppKit, accessibility, file/document workflows, and platform capabilities.
+
 ### `git-spice`
 Working effectively with [git-spice](https://abhinav.github.io/git-spice/) for stacked branches and GitLab/GitHub merge requests.
 
