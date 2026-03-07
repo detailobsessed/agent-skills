@@ -8,18 +8,12 @@ The goal is not just “Swift on desktop.” The goal is Mac-native product and 
 
 - Cover the major areas Apple emphasizes for macOS without the obvious gaps
 - Prefer stable, official Apple guidance over trend-driven or speculative platform claims
-- Reuse already-strong local material where it was genuinely useful
+- Keep the skill cohesive and self-contained
 - Keep `SKILL.md` concise and push depth into focused reference files
 
 ## Source policy
 
-This skill was built from three source classes, in this order:
-
-1. **Apple Human Interface Guidelines**
-2. **Apple Developer API documentation**, verified through the Dash Apple docset where practical
-3. **Existing local `macos-development` skill content**, but only when it was already strong and not speculative
-
-If a local note conflicted with Apple’s current guidance, Apple won.
+This skill was built from Apple’s own macOS design and developer documentation first, then synthesized into practical reference modules for repeated use.
 
 ## Primary Apple HIG pages used
 
@@ -44,7 +38,9 @@ If a local note conflicted with Apple’s current guidance, Apple won.
 
 ## Dash verification notes
 
-The following symbols or APIs were explicitly checked in the Dash Apple docset while building this skill:
+During authoring, the Dash MCP server was used to cross-check concrete Apple symbols and APIs. The skill files themselves intentionally refer only to official Apple documentation.
+
+The following symbols or APIs were explicitly checked this way while building the skill:
 
 - `DocumentGroup`
 - `MenuBarExtra`
@@ -65,7 +61,6 @@ Primary basis:
 
 - Apple HIG as the design source of truth
 - Apple Developer docs as the API source of truth
-- Dash workflow established during creation of this skill
 
 Purpose:
 
@@ -78,9 +73,9 @@ Primary basis:
 - `Designing for macOS`
 - related HIG guidance on windows, menus, toolbars, sidebars, drag and drop, and full-screen behavior
 
-Adapted local material:
+Emphasis:
 
-- the review framing from the previous local `macos-development` skill
+- a review lens that turns Apple’s HIG principles into practical macOS product heuristics
 
 ### `references/windows-navigation.md`
 
@@ -90,9 +85,9 @@ Primary basis:
 - SwiftUI scene and navigation APIs
 - AppKit window and split-view APIs
 
-Adapted local material:
+Emphasis:
 
-- selected structure from the old `macos-tahoe-hig.md` and window-related AppKit notes, rewritten to remove Tahoe-specific assumptions
+- standard Mac windowing and navigation patterns over version-fashionable design framing
 
 ### `references/menus-commands-input.md`
 
@@ -102,9 +97,9 @@ Primary basis:
 - standard macOS command and shortcut expectations
 - SwiftUI command APIs and AppKit menu/responder-chain patterns
 
-Adapted local material:
+Emphasis:
 
-- small portions of the prior SwiftUI/AppKit review notes where they already matched stable Mac conventions
+- standard commands, shortcuts, menus, and drag-and-drop as first-class Mac UI
 
 ### `references/file-management-documents.md`
 
@@ -115,9 +110,9 @@ Primary basis:
 - SwiftUI file workflow APIs
 - AppKit file panels, document architecture, and Quick Look integration
 
-Adapted local material:
+Emphasis:
 
-- sandbox and Quick Look notes from the previous local `macos-development` skill, tightened around standard file/document workflows
+- standard file and document workflows instead of custom file UX
 
 ### `references/accessibility.md`
 
@@ -126,9 +121,9 @@ Primary basis:
 - Apple accessibility guidance for macOS
 - VoiceOver and accessibility API documentation
 
-Adapted local material:
+Emphasis:
 
-- significant reuse of the previous local accessibility module because it was already one of the strongest parts of that skill, with the content shortened and normalized around stable macOS guidance
+- stable accessibility guidance centered on VoiceOver, keyboard navigation, and visual accessibility
 
 ### `references/swiftui-macos.md`
 
@@ -136,9 +131,9 @@ Primary basis:
 
 - SwiftUI scene, navigation, table, command, menu bar, file workflow, and focus APIs for macOS
 
-Adapted local material:
+Emphasis:
 
-- selected patterns from the previous `swiftui-macos.md`, with the Tahoe-specific bug and design-system sections removed
+- SwiftUI patterns that feel native on macOS rather than generic cross-platform usage
 
 ### `references/appkit-and-bridging.md`
 
@@ -148,9 +143,9 @@ Primary basis:
 - `NSHostingView`
 - standard representable bridging patterns
 
-Adapted local material:
+Emphasis:
 
-- substantial reuse of the previous AppKit/SwiftUI bridge content because it was practical and strong, but rewritten to emphasize stable patterns instead of version-fashionable framing
+- using AppKit deliberately and keeping the AppKit-SwiftUI bridge thin
 
 ### `references/persistence-and-data.md`
 
@@ -160,9 +155,9 @@ Primary basis:
 - document-based app guidance
 - Apple platform conventions for preferences vs documents vs relational app data
 
-Adapted local material:
+Emphasis:
 
-- selected SwiftData and data-persistence notes from the previous local skill, condensed and reframed around storage-choice decision making
+- matching storage technology to the user’s mental model and app shape
 
 ### `references/platform-capabilities-distribution.md`
 
@@ -173,13 +168,13 @@ Primary basis:
 - extension and Quick Look documentation
 - Apple distribution expectations for signed and notarized Mac apps
 
-Adapted local material:
+Emphasis:
 
-- the strongest parts of the previous sandboxing, menu bar, background, and extension notes, rewritten to stay source-backed and avoid speculative platform claims
+- treating capabilities, entitlements, and distribution decisions as both UX and engineering concerns
 
 ## What I intentionally removed
 
-The previous local skill contained several Tahoe-era and Apple Intelligence sections that looked too speculative or too weakly sourced to keep as authoritative guidance. This skill intentionally avoids treating those claims as facts unless they are re-verified against official Apple documentation.
+During authoring, I discarded any concrete claims that I could not corroborate in Apple’s own documentation. That especially affected version-specific, newly announced, or overly specific platform assertions that named APIs or behaviors without clear support in Apple’s published materials.
 
 ## Install
 

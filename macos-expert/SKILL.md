@@ -12,10 +12,9 @@ Use this skill to keep macOS work native, modern, and source-backed.
 Use sources in this order:
 
 1. Apple Human Interface Guidelines and Apple Developer documentation
-2. Dash Apple docsets for API verification
-3. Reference files in this skill
+2. Reference files in this skill
 
-If a named API, symbol, modifier, entitlement, or platform behavior is uncertain, verify it in Dash before presenting it as fact.
+If a named API, symbol, modifier, entitlement, or platform behavior is uncertain, verify it against current official Apple documentation before presenting it as fact.
 
 Start with `references/official-sources.md` if you need the verification workflow or the canonical Apple source map.
 
@@ -47,7 +46,7 @@ Start with `references/official-sources.md` if you need the verification workflo
 - Treat accessibility as a default requirement, not a polish pass
 - Treat keyboard support, context menus, drag and drop, and undo/redo as core Mac affordances
 - If custom UI replaces a standard control, preserve discoverability, keyboard support, and accessibility semantics
-- Avoid speculative Tahoe-era or Apple Intelligence claims unless verified against current official docs
+- Avoid version-specific or newly announced platform claims unless verified against current official docs
 
 ## Response expectations
 
