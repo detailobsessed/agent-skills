@@ -7,4 +7,5 @@ dependencies = []
 [dependency-groups]
 dev = [
     "prek>=0.3.4,<0.4",
+    "skills-ref>=0.1.1",
 ]

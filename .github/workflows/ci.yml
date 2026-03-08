@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: "pyproject.toml"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - name: Sync dependencies
+        run: uv sync --locked --group dev
+      - name: Validate Agent Skills spec
+        run: |
+          uv run agentskills validate git-spice
+          uv run agentskills validate macos-expert
+          uv run agentskills validate wise-mcp
+      - name: Run prek hooks
+        uses: j178/prek-action@v1
+        with:
+          extra-args: "--all-files typos markdownlint"

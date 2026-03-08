@@ -43,8 +43,15 @@ Validation tooling is configured at the repository root:
 
 - `pyproject.toml` provides the shared Python tooling definition
 - `prek.toml` runs formatting and quality checks across all skills in the repo
+- official Agent Skills spec validation runs via `uv run agentskills validate <skill-dir>`
 
 This is intentional: spell-checking, dead-link checking, TOML validation, and related checks should apply consistently to every skill instead of being duplicated inside each skill directory.
+
+Run the official skill validation for all current skills from the repo root with:
+
+```bash path=null start=null
+nu scripts/validate_skills.nu
+```
 
 If GitButler is managing `pre-commit`, prefer leaving that hook in place and using `prek` primarily for `pre-push`. This repo is configured so a plain `prek install` installs only `pre-push` by default, which avoids overwriting a custom or GitButler-managed `pre-commit` hook.
 
@@ -88,6 +95,7 @@ The preferred workflow here is:
 4. Run repository validation from the root:
 
     ```bash path=null start=null
+    uv run agentskills validate my-skill
     prek run --all-files
     ```
 
