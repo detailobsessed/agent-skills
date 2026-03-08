@@ -30,7 +30,7 @@ hooks = [{ id = "typos", priority = 1 }]
 [[repos]]
 repo = "local"
 hooks = [
-    { id = "agentskills-validate", name = "Validate Agent Skills spec", language = "system", entry = "nu scripts/validate_skills.nu", pass_filenames = false, always_run = true, stages = ["pre-push"], priority = 1 },
+    { id = "agentskills-validate", name = "Validate Agent Skills spec", language = "system", entry = "uv run python scripts/validate_skills.py", pass_filenames = false, always_run = true, stages = ["pre-push"], priority = 1 },
 ]
 
 [[repos]]
