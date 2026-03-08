@@ -34,5 +34,5 @@ hooks = [{ id = "markdownlint", priority = 1 }]
 
 [[repos]]
 repo = "https://github.com/lycheeverse/lychee"
-rev = "nightly"  # lychee tags nightly as latest; prek autoupdate may switch to it
+rev = "lychee-v0.23.0"  # lychee tags nightly as latest; prek autoupdate may switch to it
 hooks = [{ id = "lychee", args = ["--no-progress"], priority = 1, stages = ["pre-push"], types_or = ["markdown"] }]
