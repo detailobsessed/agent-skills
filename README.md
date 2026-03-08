@@ -46,6 +46,17 @@ Validation tooling is configured at the repository root:
 
 This is intentional: spell-checking, dead-link checking, TOML validation, and related checks should apply consistently to every skill instead of being duplicated inside each skill directory.
 
+If GitButler is managing `pre-commit`, prefer leaving that hook in place and using `prek` primarily for `pre-push`. This repo is configured so a plain `prek install` installs only `pre-push` by default, which avoids overwriting a custom or GitButler-managed `pre-commit` hook.
+
+This repo also has a local chained `pre-commit` setup in `.git/hooks` so we do not forget how it works:
+
+- `pre-commit` is a local wrapper
+- `pre-commit-gitbutler` preserves the GitButler workspace-protection hook
+- `pre-commit-prek` preserves the `prek` pre-commit launcher
+- the wrapper runs GitButler first, then `prek`
+
+If `pre-commit` gets replaced by a future explicit `prek install --hook-type pre-commit`, restore the wrapper instead of treating `pre-commit.legacy` as the long-term source of truth.
+
 ## Skills
 
 ### `macos-expert`

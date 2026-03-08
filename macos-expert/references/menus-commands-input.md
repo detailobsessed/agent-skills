@@ -15,6 +15,14 @@ Preserve the standard macOS structure unless there is a strong reason not to:
 
 Add custom menus only when a domain has enough commands to justify one.
 
+Keep standard menu items visible even when they are temporarily unavailable; disable them instead of hiding them.
+
+## App-wide menu basics
+
+- Put About, Settings, app visibility items, and Quit in the app menu
+- Support the system-provided Services submenu when it applies to the current context
+- Use the Help menu for help content and keep it small and focused
+
 ## Command coverage
 
 Core actions should usually be available in more than one place:
@@ -62,6 +70,14 @@ Use context menus to accelerate object-level actions:
 - Delete
 
 Context menus should supplement the app’s main command surface, not replace it.
+
+## Dock menus
+
+Dock menus are a useful macOS-only shortcut surface for high-value actions when the app is running but not frontmost.
+
+- Prefer a small set of high-value items like recent or open windows, new-item actions, or refresh/sync actions
+- Make custom Dock menu items available elsewhere too, such as in the menu bar or main UI
+- Do not treat the Dock menu as the only route to an important command
 
 ## Pointer and keyboard interaction
 

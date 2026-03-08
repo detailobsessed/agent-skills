@@ -2,32 +2,32 @@
 # See https://prek.j178.dev for more information.
 #:schema https://www.schemastore.org/prek.json
 
+default_stages = ["pre-commit"]
+minimum_prek_version = "0.3.4"
+default_install_hook_types = ["pre-push"]
+
 [[repos]]
 repo = "builtin"
 hooks = [
-    { id = "trailing-whitespace" },
-    { id = "end-of-file-fixer" },
-    { id = "check-added-large-files" },
-    { id = "check-case-conflict" },
-    { id = "check-merge-conflict" },
-    { id = "check-toml" },
-    { id = "check-yaml" },
-    { id = "mixed-line-ending" },
+    { id = "trailing-whitespace", priority = 0 },
+    { id = "end-of-file-fixer", priority = 0 },
+    { id = "check-added-large-files", args = ["--maxkb=1024"], priority = 0 },
+    { id = "check-case-conflict", priority = 0 },
+    { id = "check-merge-conflict", priority = 0 },
+    { id = "check-toml", priority = 0 },
+    { id = "check-json", priority = 0 },
+    { id = "check-yaml", priority = 0 },
+    { id = "check-symlinks", priority = 0 },
+    { id = "mixed-line-ending", args = ["--fix=lf"], priority = 0 },
+    { id = "detect-private-key", priority = 0 },
 ]
 
 [[repos]]
-repo = "local"
+repo = "https://github.com/crate-ci/typos"
+rev = "v1.43.4"  # prek autoupdate will fill this
+hooks = [{ id = "typos", priority = 1 }]
 
-[[repos.hooks]]
-id = "typos"
-name = "typos"
-entry = "uv run typos"
-language = "system"
-types = ["text"]
-
-[[repos.hooks]]
-id = "lychee"
-name = "lychee"
-entry = "lychee --no-progress"
-language = "system"
-types = ["markdown"]
+[[repos]]
+repo = "https://github.com/lycheeverse/lychee"
+rev = "lychee-v0.23.0"  # lychee tags nightly as latest; prek autoupdate may switch to it
+hooks = [{ id = "lychee", args = ["--no-progress"], priority = 1, stages = ["pre-push"], types_or = ["markdown"] }]

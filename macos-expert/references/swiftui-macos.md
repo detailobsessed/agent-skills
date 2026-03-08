@@ -8,6 +8,7 @@ Prefer SwiftUI patterns that feel native on macOS rather than cross-platform abs
 - `Table` for data-heavy or sortable tabular content
 - `WindowGroup`, `Window`, `Settings`, and `DocumentGroup` for scenes
 - `.toolbar` and `.commands` for primary actions
+- `.searchable` for standard search UI instead of custom search chrome
 - `MenuBarExtra` for menu bar utilities
 - `.fileImporter`, `.fileExporter`, and `.dropDestination` for file workflows
 

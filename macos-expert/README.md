@@ -21,6 +21,8 @@ This skill was built from Apple’s own macOS design and developer documentation
 - `https://developer.apple.com/design/human-interface-guidelines/windows`
 - `https://developer.apple.com/design/human-interface-guidelines/toolbars`
 - `https://developer.apple.com/design/human-interface-guidelines/sidebars`
+- `https://developer.apple.com/design/human-interface-guidelines/the-menu-bar`
+- `https://developer.apple.com/design/human-interface-guidelines/dock-menus`
 - `https://developer.apple.com/design/human-interface-guidelines/menus`
 - `https://developer.apple.com/design/human-interface-guidelines/file-management`
 - `https://developer.apple.com/design/human-interface-guidelines/drag-and-drop`
@@ -36,9 +38,9 @@ This skill was built from Apple’s own macOS design and developer documentation
 - Quick Look
 - Uniform Type Identifiers
 
-## Dash verification notes
+## Sosumi verification notes
 
-During authoring, the Dash MCP server was used to cross-check concrete Apple symbols and APIs. The skill files themselves intentionally refer only to official Apple documentation.
+During authoring and review, the Sosumi MCP server was used to cross-check concrete Apple symbols and documentation pages. The skill files themselves intentionally refer only to official Apple documentation.
 
 The following symbols or APIs were explicitly checked this way while building the skill:
 
@@ -93,7 +95,7 @@ Emphasis:
 
 Primary basis:
 
-- HIG guidance for menus and drag-and-drop
+- HIG guidance for menus, the menu bar, Dock menus, and drag-and-drop
 - standard macOS command and shortcut expectations
 - SwiftUI command APIs and AppKit menu/responder-chain patterns
 

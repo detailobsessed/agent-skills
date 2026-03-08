@@ -36,7 +36,7 @@ Do not add an extension target just to mirror functionality that belongs in the 
 ## Distribution
 
 - **Mac App Store**: sandboxing and review requirements shape the implementation
-- **Direct distribution**: still requires code signing and notarization for a polished, trustworthy install flow
+- **Direct distribution**: plan for Developer ID signing, Hardened Runtime, and notarization as part of the product’s normal shipping path
 - Be explicit about what differs between store and direct builds if the feature set changes
 
 ## Shipping checklist

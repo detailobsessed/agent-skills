@@ -57,6 +57,7 @@ Use tabs only when sections are true peers and do not benefit from a shared side
 - `NavigationSplitView`
 - `WindowGroup`, `Window`, `Settings`, `DocumentGroup`
 - `.toolbar`, `.toolbarRole`, `.defaultSize`, `.windowToolbarStyle`
+- `.searchable` for standard in-window search where search is a primary workflow
 - `openWindow(id:)` when auxiliary windows are appropriate
 
 ## AppKit defaults
