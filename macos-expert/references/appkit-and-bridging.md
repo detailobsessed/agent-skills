@@ -51,3 +51,10 @@ This is the best default when SwiftUI is the shell but specific controls still n
 - Coordinators, delegates, and notifications are cleaned up correctly
 - Layout and resizing remain stable
 - Standard AppKit controls are preferred over unnecessary custom widgets
+
+## Pair this file with
+
+- `swiftui-macos.md` for SwiftUI-first patterns and when SwiftUI is enough
+- `windows-navigation.md` for AppKit window, toolbar, and split-view details
+- `menus-commands-input.md` for responder chain, menu validation, and drag-and-drop
+- `accessibility.md` for AppKit accessibility overrides and testing

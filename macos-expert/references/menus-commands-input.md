@@ -119,3 +119,10 @@ Treat drag and drop as a core Mac affordance in file-centric and list-centric ap
 - Undo/redo and copy/paste exist where users expect them
 - Context menus and drag-and-drop improve workflows instead of duplicating clutter
 - Keyboard navigation is complete enough for expert use
+
+## Pair this file with
+
+- `designing-for-macos.md` for macOS-first product and interaction expectations
+- `windows-navigation.md` for toolbar placement and window structure
+- `accessibility.md` for keyboard navigation and focus requirements
+- `file-management-documents.md` for drag-and-drop file workflows

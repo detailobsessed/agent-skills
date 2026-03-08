@@ -75,3 +75,10 @@ Use tabs only when sections are true peers and do not benefit from a shared side
 - The app uses sidebars and inspectors where macOS users expect them
 - Full-screen is supported sensibly for content-heavy tasks
 - Auxiliary windows exist only when they represent a real separate workspace
+
+## Pair this file with
+
+- `designing-for-macos.md` for broader macOS product and UX expectations
+- `menus-commands-input.md` for toolbar actions, commands, and shortcuts
+- `swiftui-macos.md` for SwiftUI scene and navigation API patterns
+- `appkit-and-bridging.md` for AppKit window and split-view details

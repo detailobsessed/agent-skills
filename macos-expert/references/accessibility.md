@@ -74,3 +74,10 @@ Accessibility is part of correctness on macOS, not an optional polish pass.
 - Focus does not jump unpredictably
 - Complex rows, custom controls, and tables remain understandable to VoiceOver
 - Contrast and motion settings are respected
+
+## Pair this file with
+
+- `designing-for-macos.md` for macOS interaction expectations that affect accessibility
+- `menus-commands-input.md` for keyboard shortcuts and command coverage
+- `swiftui-macos.md` for SwiftUI accessibility modifiers and focus APIs
+- `appkit-and-bridging.md` for AppKit accessibility overrides and bridging concerns

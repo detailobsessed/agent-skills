@@ -57,3 +57,10 @@ Bridge to AppKit when you need:
 - Observation and state lifetimes are clean
 - Mac-specific affordances are present instead of emulated
 - AppKit is introduced only where SwiftUI meaningfully falls short
+
+## Pair this file with
+
+- `appkit-and-bridging.md` for when and how to bridge to AppKit
+- `windows-navigation.md` for window, toolbar, and navigation layout guidance
+- `menus-commands-input.md` for commands, shortcuts, and menu structure
+- `persistence-and-data.md` for SwiftData and document storage choices
