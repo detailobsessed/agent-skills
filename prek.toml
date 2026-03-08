@@ -30,7 +30,7 @@ hooks = [{ id = "typos", priority = 1 }]
 [[repos]]
 repo = "https://github.com/igorshubovych/markdownlint-cli"
 rev = "v0.48.0"
-hooks = [{ id = "markdownlint", priority = 1 }]
+hooks = [{ id = "markdownlint", priority = 1, stages = ["pre-commit"], types_or = ["markdown"] }]
 
 [[repos]]
 repo = "https://github.com/lycheeverse/lychee"

@@ -77,16 +77,18 @@ The preferred workflow here is:
 
 1. Create the skill scaffold:
 
-```bash path=null start=null
-skills init my-skill
-```
+    ```bash
+    skills init my-skill
+    ```
 
-1. Replace the generated `SKILL.md` with the real skill content
-1. Add any supporting `references/`, assets, or additional files the skill needs
-1. Run repository validation from the root:
+2. Replace the generated `SKILL.md` with the real skill content
 
-```bash path=null start=null
-prek run --all-files
-```
+3. Add any supporting `references/`, assets, or additional files the skill needs
 
-1. Commit the change in small, reviewable steps
+4. Run repository validation from the root:
+
+    ```bash
+    prek run --all-files
+    ```
+
+5. Commit the change in small, reviewable steps
