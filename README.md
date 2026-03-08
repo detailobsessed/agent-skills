@@ -77,7 +77,7 @@ The preferred workflow here is:
 
 1. Create the skill scaffold:
 
-    ```bash
+    ```bash path=null start=null
     skills init my-skill
     ```
 
@@ -87,7 +87,7 @@ The preferred workflow here is:
 
 4. Run repository validation from the root:
 
-    ```bash
+    ```bash path=null start=null
     prek run --all-files
     ```
 
