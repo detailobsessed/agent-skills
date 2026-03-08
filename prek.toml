@@ -28,6 +28,11 @@ rev = "v1.43.4"  # prek autoupdate will fill this
 hooks = [{ id = "typos", priority = 1 }]
 
 [[repos]]
+repo = "https://github.com/igorshubovych/markdownlint-cli"
+rev = "v0.48.0"
+hooks = [{ id = "markdownlint", priority = 1 }]
+
+[[repos]]
 repo = "https://github.com/lycheeverse/lychee"
 rev = "lychee-v0.23.0"  # lychee tags nightly as latest; prek autoupdate may switch to it
 hooks = [{ id = "lychee", args = ["--no-progress"], priority = 1, stages = ["pre-push"], types_or = ["markdown"] }]
