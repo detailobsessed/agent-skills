@@ -67,3 +67,10 @@ File handling is a core Mac experience. Prefer standard system flows over custom
 - Drag-and-drop supports common file workflows
 - File access rules and sandbox implications are handled correctly
 - Custom file types are previewable and well-integrated where appropriate
+
+## Pair this file with
+
+- `menus-commands-input.md` for drag-and-drop, clipboard, and file-related commands
+- `persistence-and-data.md` for choosing between file-based and database-backed storage
+- `platform-capabilities-distribution.md` for sandboxing, entitlements, and security-scoped bookmarks
+- `swiftui-macos.md` for SwiftUI file workflow APIs

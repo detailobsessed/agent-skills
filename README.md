@@ -43,8 +43,15 @@ Validation tooling is configured at the repository root:
 
 - `pyproject.toml` provides the shared Python tooling definition
 - `prek.toml` runs formatting and quality checks across all skills in the repo
+- official Agent Skills spec validation runs via `scripts/validate_skills.py`, which discovers top-level skill directories and invokes `uv run agentskills validate <skill-dir>` for each one
 
 This is intentional: spell-checking, dead-link checking, TOML validation, and related checks should apply consistently to every skill instead of being duplicated inside each skill directory.
+
+Run the official skill validation for all current skills from the repo root with:
+
+```bash path=null start=null
+uv run python scripts/validate_skills.py
+```
 
 If GitButler is managing `pre-commit`, prefer leaving that hook in place and using `prek` primarily for `pre-push`. This repo is configured so a plain `prek install` installs only `pre-push` by default, which avoids overwriting a custom or GitButler-managed `pre-commit` hook.
 
@@ -60,29 +67,36 @@ If `pre-commit` gets replaced by a future explicit `prek install --hook-type pre
 ## Skills
 
 ### `macos-expert`
+
 Source-backed macOS app development guidance covering Apple HIG expectations, SwiftUI, AppKit, accessibility, file/document workflows, and platform capabilities.
 
 ### `git-spice`
+
 Working effectively with [git-spice](https://abhinav.github.io/git-spice/) for stacked branches and GitLab/GitHub merge requests.
 
 ### `wise-mcp`
+
 Building MCP servers with [FastMCP](https://github.com/PrefectHQ/fastmcp), informed by battle-tested agentic tool design patterns by [Arcade](https://www.arcade.dev/patterns).
 
 ## Adding a new skill
+
 The preferred workflow here is:
 
 1. Create the skill scaffold:
 
-```bash path=null start=null
-skills init my-skill
-```
+    ```bash path=null start=null
+    skills init my-skill
+    ```
 
 2. Replace the generated `SKILL.md` with the real skill content
+
 3. Add any supporting `references/`, assets, or additional files the skill needs
+
 4. Run repository validation from the root:
 
-```bash path=null start=null
-prek run --all-files
-```
+    ```bash path=null start=null
+    uv run python scripts/validate_skills.py
+    prek run --all-files
+    ```
 
 5. Commit the change in small, reviewable steps

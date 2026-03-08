@@ -27,6 +27,7 @@ This skill guides you through building high-quality MCP servers using FastMCP (P
 ### 1. Before you start
 
 Fetch the latest documentation before writing any code:
+
 - Read https://gofastmcp.com/llms-full.txt for current FastMCP API, decorators, and patterns
 - Read https://www.arcade.dev/patterns/llm.txt for the full pattern catalog with explanations
 

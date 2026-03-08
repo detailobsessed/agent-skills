@@ -46,3 +46,10 @@ Do not add an extension target just to mirror functionality that belongs in the 
 - extension boundaries are appropriate
 - privacy descriptions are accurate
 - signing, notarization, and distribution paths are planned early enough to avoid late surprises
+
+## Pair this file with
+
+- `file-management-documents.md` for sandboxed file access and security-scoped bookmarks
+- `persistence-and-data.md` for App Group containers and shared storage
+- `swiftui-macos.md` for MenuBarExtra and SwiftUI scene types
+- `official-sources.md` for verifying entitlements and Info.plist keys

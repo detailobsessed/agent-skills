@@ -48,3 +48,9 @@ Do not force a database-shaped UX onto a document-shaped product.
 - File/document workflows are file-native when appropriate
 - Preferences are separated from user content
 - Background work, fetch size, and migration risks are considered
+
+## Pair this file with
+
+- `file-management-documents.md` for document-based app workflows and file storage
+- `swiftui-macos.md` for SwiftUI data flow and observation patterns
+- `platform-capabilities-distribution.md` for App Groups, sandboxing, and shared containers

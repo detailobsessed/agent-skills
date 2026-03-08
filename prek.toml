@@ -24,8 +24,19 @@ hooks = [
 
 [[repos]]
 repo = "https://github.com/crate-ci/typos"
-rev = "v1.43.4"  # prek autoupdate will fill this
-hooks = [{ id = "typos", priority = 1 }]
+rev = "v1.44.0"  # prek autoupdate will fill this
+hooks = [{ id = "typos", priority = 1, stages = ["pre-push"] }]
+
+[[repos]]
+repo = "local"
+hooks = [
+    { id = "agentskills-validate", name = "Validate Agent Skills spec", language = "system", entry = "uv run python scripts/validate_skills.py", pass_filenames = false, always_run = true, stages = ["pre-push"], priority = 1 },
+]
+
+[[repos]]
+repo = "https://github.com/igorshubovych/markdownlint-cli"
+rev = "v0.48.0"
+hooks = [{ id = "markdownlint", priority = 1, stages = ["pre-push"], types_or = ["markdown"] }]
 
 [[repos]]
 repo = "https://github.com/lycheeverse/lychee"
