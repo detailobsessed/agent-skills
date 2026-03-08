@@ -6,7 +6,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
-def iter_skill_directories() -> list[str]:
+def get_skill_directories() -> list[str]:
     skills = sorted(
         path.name
         for path in REPO_ROOT.iterdir()
@@ -20,7 +20,7 @@ def iter_skill_directories() -> list[str]:
 def main() -> int:
     failures: list[str] = []
 
-    for skill in iter_skill_directories():
+    for skill in get_skill_directories():
         print(f"== {skill} ==")
         result = subprocess.run(
             ["uv", "run", "agentskills", "validate", skill],
