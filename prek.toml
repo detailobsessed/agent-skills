@@ -25,7 +25,7 @@ hooks = [
 [[repos]]
 repo = "https://github.com/crate-ci/typos"
 rev = "v1.44.0"  # prek autoupdate will fill this
-hooks = [{ id = "typos", priority = 1 }]
+hooks = [{ id = "typos", priority = 1, stages = ["pre-push"] }]
 
 [[repos]]
 repo = "local"
