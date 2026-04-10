@@ -1,6 +1,6 @@
 ---
 name: git-spice
-description: Use git-spice to manage stacked branches and GitLab/GitHub merge requests. Covers setup, daily workflow, staging rules, MR descriptions, issue closing, amending, and merging stacks bottom-up. Invoke when working with stacked PRs/MRs or whenever the user mentions gs, git-spice, or stacked branches.
+description: Use git-spice to manage stacked branches and pull/merge requests on GitHub, GitLab, or Bitbucket Cloud. Covers setup, daily workflow, staging rules, submitting, amending, and syncing stacks. Invoke when working with stacked PRs/MRs or whenever the user mentions gs, git-spice, or stacked branches.
 ---
 
 # git-spice
@@ -20,9 +20,9 @@ git-spice <command> -h          # any command
 
 - Working on a feature that spans multiple logical commits or MRs
 - Keeping a chain of dependent branches in sync after rebases
-- Creating, updating, or merging a stack of GitLab or GitHub MRs
+- Creating, updating, or merging a stack of GitLab, GitHub, or Bitbucket Cloud MRs/PRs
 - Amending commits in the middle of a stack and propagating changes upward
-- Any time the user mentions `git-spice`, `gs` (deprecated alias), or "stacked branches/PRs"
+- Any time the user mentions `git-spice`, `gs` (removed alias — see note below), or "stacked branches/PRs"
 
 ## Instructions
 
@@ -30,7 +30,7 @@ git-spice <command> -h          # any command
 
 Run `git-spice -h` to see all available commands. Command names and flags evolve — always verify against the installed version rather than guessing. The help output is concise and authoritative.
 
-> **Note:** As of v0.24.0, the binary was renamed from `gs` to `git-spice`. To keep using the short form, add `alias gs='git-spice'` to your shell config.
+> **Note:** The `gs` binary was removed entirely in v0.25.0 (it was renamed in v0.24.0). To keep using the short form, add `alias gs='git-spice'` to your shell config.
 
 ### 2. One-time setup
 
@@ -45,10 +45,19 @@ For GitLab (self-hosted), also set the forge URLs and authenticate:
 ```bash
 git config spice.forge.gitlab.url https://gitlab.example.com
 git config spice.forge.gitlab.apiURL https://gitlab.example.com/api/v4
-git-spice auth login --forge=gitlab          # uses a Personal Access Token
+git-spice auth login --forge=gitlab          # prompts for auth method (OAuth, PAT, CLI, etc.)
 ```
 
-For GitHub (public), authentication works out of the box via `git-spice auth login`.
+For GitHub (public), authentication works out of the box via `git-spice auth login`. GitHub OAuth requires `read:org` scope (for team-based `--reviewer` resolution) — run `git-spice auth login --refresh` if you authenticated before v0.22.0.
+
+For Bitbucket Cloud (v0.25.0+), authenticate via Git Credential Manager (GCM) or app passwords:
+
+```bash
+git config spice.forge.bitbucket.url https://bitbucket.org
+git-spice auth login --forge=bitbucket
+```
+
+> **Note:** Bitbucket Cloud does not support PR labels, PR assignees, or template enumeration.
 
 ### 3. Core concepts
 
@@ -61,55 +70,51 @@ For GitHub (public), authentication works out of the box via `git-spice auth log
 
 ### 4. Staging rules — read this carefully
 
-**`git-spice bc -a` only stages tracked modified files**, just like `git commit -a`. It does NOT pick up new untracked files.
+Most git-spice commit commands (`bc`, `cc`, `ca`) accept `-a`/`--all` to auto-stage tracked modified and deleted files — just like `git commit -a`. **Prefer `-a` over manual `git add` for tracked files.**
 
-**`git-spice commit amend` does NOT auto-stage anything** — it amends whatever is currently staged.
+**`-a` does NOT pick up new untracked files.** You must `git add` new files explicitly before the git-spice command. **`commit fixup` has no `-a` flag** — you must stage changes before running it.
 
-**Always run `git add` explicitly before any `git-spice` commit operation:**
-
-```bash
-git add <new-or-modified-files>
-git-spice bc -m "feat: my feature"           # create branch + commit staged changes
-```
-
-```bash
-git add <changed-files>
-git-spice commit amend --no-edit             # amend the current branch's commit
-```
-
-Forgetting this is the most common source of empty or incomplete commits.
+Forgetting to stage new files is the most common source of incomplete commits.
 
 ### 5. Daily workflow
 
 #### Create branches in a stack
 
 ```bash
-# On trunk or any branch — stage first, then create
-git add src/feature.py tests/test_feature.py
-git-spice bc feature-part-1 -m "feat: add core feature logic"
+# On trunk or any branch — create a branch with all tracked changes
+git-spice bc feature-part-1 -a -m "feat: add core feature logic"
 
 # Continue stacking
-git add src/more.py
-git-spice bc feature-part-2 -m "feat: add API layer"
+git-spice bc feature-part-2 -a -m "feat: add API layer"
 ```
 
 `git-spice bc` creates the branch, commits staged changes, and records the parent relationship.
 
-#### Navigate the stack
+Additional `branch create` flags:
+
+- `--insert` — insert the new branch between the current branch and its upstack children
+- `--below` — create the branch below the current one (between current and its base)
+- `--target` / `-t` — specify a different base branch instead of the current one
+
+#### Add commits to an existing branch
 
 ```bash
-git-spice log short              # visual overview of the entire stack
+git-spice cc -a -m "feat: additional work"   # commit to current branch, auto-restacks upstack
+```
+
+#### Navigate and inspect the stack
+
+```bash
+git-spice log short              # visual overview of the stack with MR status
+git-spice log short -a           # show ALL tracked branches, not just current stack
+git-spice log long               # detailed view with commit hashes and descriptions
+git-spice log short --cr-comments  # include review comment resolution counts
+git-spice branch diff            # diff between current branch and its base
 git-spice up                     # move up one branch toward the tip
 git-spice down                   # move down one branch toward trunk
 git-spice top                    # jump to the top of the stack
 git-spice bottom                 # jump to the bottom (first branch above trunk)
-```
-
-#### Check current state
-
-```bash
-git-spice branch show            # current branch details and parent
-git-spice stack show             # full stack with MR status (if submitted)
+git-spice trunk                  # switch to the trunk branch
 ```
 
 ### 6. Submitting the stack
@@ -122,7 +127,27 @@ git-spice stack submit --fill --no-draft
 
 - `--fill` populates MR title and description from the commit message
 - `--no-draft` marks MRs as ready for review immediately
-- Re-run after amending to update existing MRs: `git-spice stack submit --update-only`
+- `--update-only` / `-u` — only update existing MRs, skip creating new ones (see "Amending commits in the stack")
+
+Additional submit flags (available on `stack submit`, `branch submit`, `upstack submit`, `downstack submit`):
+
+- `--reviewer` / `-r` — request reviewers (supports team names on GitHub with `read:org` scope)
+- `--assign` / `-a` — assign users to the MR/PR
+- `--label` / `-l` — add labels
+- `--web` / `-w` — open in browser (`true`, `false`, or `created` for new MRs only)
+- `--nav-comment` — control navigation comments (`true`, `false`, `multiple`)
+- `--no-verify` — bypass pre-push hooks
+- `--no-publish` — push branches without creating MRs/PRs
+- `--force` — force push, bypassing safety checks
+- `--dry-run` / `-n` — print what would be submitted without doing it
+
+These flags can also be set as defaults via `git config`:
+
+```bash
+git config spice.submit.reviewers "alice,bob"
+git config spice.submit.assignees "alice"
+git config spice.submit.draft true
+```
 
 To submit only the current branch's MR:
 
@@ -130,31 +155,12 @@ To submit only the current branch's MR:
 git-spice branch submit --fill --no-draft
 ```
 
-### 7. MR descriptions and issue closing
-
-**Do not use `git-spice bs --body "..."` to set issue-closing phrases.** It is silently ignored when there are no new commits to push ("CR is up-to-date").
-
-**Use `glab mr update` instead — it always works:**
-
-```bash
-glab mr update <mr-id> --description "## Summary
-
-Implements XYZ.
-
-Closes #42"
-```
-
-This updates the description on GitLab immediately. When the MR is merged, GitLab reads the description and auto-closes the linked issue.
-
-For GitHub, use `gh pr edit <number> --body "..."`.
-
-### 8. Amending commits in the stack
+### 7. Amending commits in the stack
 
 To change the current branch's commit (fix a bug, address review feedback):
 
 ```bash
-git add <changed-files>
-git-spice commit amend --no-edit            # or: git-spice ca --no-edit
+git-spice ca -a --no-edit                   # stage tracked changes + amend in one step
 ```
 
 Then push the updated stack:
@@ -165,73 +171,95 @@ git-spice stack submit --update-only
 
 `--update-only` skips creating new MRs and only updates existing ones. It will force-push rebased branches as needed.
 
-To amend a commit that is **not** at the top of the stack:
+To amend a commit that is **not** at the top of the stack, use `commit fixup` — it applies staged changes to any downstack commit without switching branches:
 
 ```bash
-git-spice down                              # navigate to the target branch
-git add <files>
-git-spice ca --no-edit
+git add <files>                             # commit fixup has no -a flag — must stage manually
+git-spice commit fixup <commit-hash>        # amend a specific downstack commit in-place
 git-spice stack submit --update-only        # propagates rebase upward automatically
 ```
 
-### 9. Merging a stack
+If no commit hash is given, an interactive prompt lets you pick the target commit. Requires Git 2.45+.
 
-Always merge **bottom-up**: the lowest branch (closest to trunk) first. Merging out of order causes rebase conflicts.
+### 8. Syncing after merges
 
-#### Option A: Full stack merge via forge (preferred)
-
-When landing an entire stack, merge all MRs via GitLab without any local restacks between them. GitLab automatically retargets each upstream MR when its target branch is merged. One final sync at the end cleans up local tracking.
+After MRs are merged on the forge (bottom-up), sync locally to clean up:
 
 ```bash
-# Merge each MR bottom-up via GitLab — no local ops between merges
-glab mr merge <mr-1> --remove-source-branch --yes
-glab mr merge <mr-2> --remove-source-branch --yes
-glab mr merge <mr-3> --remove-source-branch --yes
-# ... repeat for the full stack
-
-# One sync at the end to clean up local branch tracking
-git-spice repo sync --restack
+git-spice repo sync --restack               # pulls trunk, removes merged branches, restacks remaining
+git-spice stack submit --update-only        # updates MR targets on the forge (if branches remain)
 ```
 
-Or use the GitLab web UI to merge each MR in order, then run the final sync.
+### 9. Other useful commands
 
-**Why:** every `git-spice repo sync --restack` between merges force-pushes all remaining branches to the forge, triggering a new pipeline run for each. For a stack of N MRs this creates O(N²) unnecessary pipeline runs.
-
-**Never use `-m "custom message"`** with `glab mr merge`. It overrides the merge commit message, which discards `Closes #XX` from the MR description. Omit `-m` so GitLab uses its default merge commit, which includes the MR body.
-
-#### Option B: Single MR merge (continuing development)
-
-When merging one MR from the bottom of the stack while keeping the rest in development:
+#### Tracking and switching
 
 ```bash
-glab mr merge <lowest-mr-id> --remove-source-branch --yes
-git-spice repo sync --restack               # pulls trunk, rebases remaining branches
-git-spice stack submit --update-only        # updates MR targets on the forge
+git-spice branch track <name>               # start tracking an existing branch
+git-spice branch track <name> --base <br>   # track with explicit base branch
+git-spice branch untrack <name>             # stop tracking (keeps the git branch)
+git-spice downstack track                   # track all untracked branches below current
+git-spice branch checkout                   # interactive branch switcher (prompts from tracked branches)
 ```
 
-The restack is necessary here because you're continuing to work on the remaining branches and they need to be based on the updated trunk.
-
-#### After-rebase 405 errors
-
-When a branch is force-pushed (after `git-spice repo sync --restack`) and you immediately try to merge, GitLab may return 405. Wait a few seconds and retry — it resolves on its own.
-
-### 10. Other useful commands
+#### Restructuring branches
 
 ```bash
-git-spice branch onto main                  # re-parent a branch directly onto trunk
+git-spice branch onto main                  # re-parent a branch onto trunk (upstack stays on old base)
+git-spice upstack onto main                 # re-parent a branch AND its upstack onto trunk
+git-spice branch fold                       # merge a branch's commits into its base branch
+git-spice branch split                      # split a branch at specific commits
+git-spice branch squash                     # squash all commits in a branch into one
+git-spice branch edit                       # interactive rebase scoped to this branch's commits
+git-spice stack edit                        # reorder branches in a stack interactively
+git-spice downstack edit                    # reorder branches below current
+```
+
+#### Commit manipulation
+
+```bash
+git-spice commit split                      # interactively split the current commit into multiple
+git-spice commit pick <commit>              # stack-aware cherry-pick
+```
+
+#### Cleanup and sync
+
+```bash
 git-spice branch delete <name>              # delete a branch and its stack tracking
+git-spice branch delete <name> --force      # delete even with unmerged changes
 git-spice branch rename <old> <new>         # rename a branch
+git-spice stack delete --force              # delete all branches in the current stack
+git-spice upstack delete --force            # delete all branches above the current one
 git-spice repo sync                         # pull trunk and update stack metadata (no restack)
 git-spice repo sync --restack               # pull trunk + rebase entire stack on top
-git-spice stack restack                     # rebase stack without pulling trunk
+git-spice repo init --reset                 # discard all tracking data and start fresh
 ```
 
-### 11. Anti-patterns
+#### Restacking
 
-- **Forgetting `git add` before `git-spice bc` or `git-spice ca`** — produces empty or partial commits. Always stage explicitly.
-- **`glab mr merge -m "..."`** — overrides the merge commit message, losing `Closes #XX` linkages.
-- **`git-spice bs --body "Closes #XX"` without code changes** — silently no-ops. Use `glab mr update --description` instead.
-- **Merging top-down** — always merge the bottom of the stack first. Top-down causes conflicts.
-- **Manually rebasing instead of `git-spice stack restack`** — breaks git-spice's branch tracking metadata.
-- **Running `git-spice repo sync --restack` between merges when landing a full stack** — force-pushes all remaining branches on every iteration, creating O(N²) unnecessary pipeline runs. Merge all MRs via the forge bottom-up first, then run one final sync. See Section 9 Option A.
+```bash
+git-spice stack restack                     # rebase current stack without pulling trunk
+git-spice branch restack                    # rebase just the current branch onto its base
+git-spice upstack restack                   # restack current branch and everything above
+git-spice repo restack                      # restack ALL tracked branches in the repo
+```
+
+#### Conflict resolution
+
+```bash
+git-spice rebase continue                   # continue after resolving conflicts
+git-spice rebase abort                      # abort an interrupted operation
+```
+
+#### Scoped submit variants
+
+```bash
+git-spice upstack submit                    # submit current branch and all above it
+git-spice downstack submit                  # submit current branch and all below it
+```
+
+### 10. Anti-patterns
+
+- **Forgetting to stage changes** — use `-a` to auto-stage tracked files, or `git add` for new untracked files. Without either, commits will be empty or incomplete.
+- **Manually rebasing instead of using git-spice restack commands** — git-spice tracks branch relationships in `.git/spice/`; a manual `git rebase` does not update this metadata.
 - **Guessing flag names** — run `git-spice <command> -h` before using any unfamiliar flag. git-spice's CLI is well-documented and the help is always accurate.

@@ -72,7 +72,7 @@ Source-backed macOS app development guidance covering Apple HIG expectations, Sw
 
 ### `git-spice`
 
-Working effectively with [git-spice](https://abhinav.github.io/git-spice/) for stacked branches and GitLab/GitHub merge requests.
+Working effectively with [git-spice](https://abhinav.github.io/git-spice/) for stacked branches and GitHub/GitLab/Bitbucket Cloud pull/merge requests.
 
 ### `wise-mcp`
 
