@@ -69,7 +69,7 @@ Shape B apps use `NSWindow`, `NSWindowController`, `NSToolbar`, `NSSplitViewCont
 When asked to build or review a macOS app, look for these signals and use them to pick the shape:
 
 | Signal | Implication |
-|---|---|
+| --- | --- |
 | "Mostly browsing content, with detail views" | Shape A |
 | "Settings-heavy utility" | Shape A |
 | "iPhone/iPad app we want on Mac too" | Shape A |

@@ -152,7 +152,7 @@ If you build custom row layouts in `ScrollView` + `LazyVStack` because `List` do
 ## Choosing the framework for the row container
 
 | Need | Use |
-|---|---|
+| --- | --- |
 | Plain rows, system look, selection, swipe actions | `List` |
 | Tabular data, sortable columns, multi-select, column customization | `Table` |
 | Custom row layouts that don't need precise selection-emphasis behavior | `ScrollView` + `LazyVStack` |
