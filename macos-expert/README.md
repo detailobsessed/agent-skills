@@ -1,19 +1,33 @@
 # macos-expert
 
-An [Agent Skill](https://agentskills.io) for modern macOS development that is explicitly grounded in Apple’s Human Interface Guidelines and official Apple developer documentation.
+An [Agent Skill](https://agentskills.io) for modern macOS development, explicitly grounded in Apple's Human Interface Guidelines and official Apple developer documentation.
 
-The goal is not just “Swift on desktop.” The goal is Mac-native product and engineering guidance: windows, menus, toolbars, sidebars, file workflows, accessibility, SwiftUI, AppKit, bridging, persistence, sandboxing, menu bar apps, and shipping.
+The goal is not "Swift on desktop." The goal is Mac-native product and engineering guidance: windows, menus, toolbars, sidebars, file workflows, accessibility, SwiftUI, AppKit, bridging, persistence, sandboxing, menu bar apps, and shipping. The skill is opinionated about when SwiftUI is enough, when AppKit is required, and when bridging is the right answer — because the wrong call here produces apps that look like Mac apps but feel like iPad apps in a window.
 
 ## Design goals
 
 - Cover the major areas Apple emphasizes for macOS without the obvious gaps
+- Reflect reality, not framework marketing — name the documented SwiftUI gaps and tell the agent when to bridge to AppKit
 - Prefer stable, official Apple guidance over trend-driven or speculative platform claims
 - Keep the skill cohesive and self-contained
-- Keep `SKILL.md` concise and push depth into focused reference files
+- Keep `SKILL.md` concise (with the Shape A vs Shape B triage rubric near the top) and push depth into focused reference files
+
+## What this skill is honest about
+
+The reference files explicitly call out concrete SwiftUI macOS gaps that Apple's own documentation acknowledges or implies:
+
+- `.contextMenu` has no "menu is open" signal and no focus-ring styling on the right-clicked row
+- `.draggable` has no session-end / cancel callback (no SwiftUI equivalent to `NSDraggingSource.draggingSession(_:endedAt:operation:)`)
+- `onMoveCommand` is macOS / tvOS only — not iOS or iPadOS
+- `TextField` consumes arrow keys for cursor movement, breaking Spotlight-style search-with-arrow-nav patterns
+- `ToolbarItemPlacement` semantic placements are platform-variable by design (Apple's own wording)
+- `backgroundProminence` works only inside `List` and `Table`, not in custom rows
+
+The skill names the AppKit alternative for each gap rather than inventing SwiftUI workarounds.
 
 ## Source policy
 
-This skill was built from Apple’s own macOS design and developer documentation first, then synthesized into practical reference modules for repeated use.
+This skill was built from Apple's own macOS design and developer documentation, plus practical experience with real Mac apps that exercise the boundaries between SwiftUI and AppKit (NetNewsWire's AppKit-shell pattern, Ruddarr's SwiftUI-only pattern).
 
 ## Primary Apple HIG pages used
 
@@ -37,146 +51,104 @@ This skill was built from Apple’s own macOS design and developer documentation
 - ServiceManagement
 - Quick Look
 - Uniform Type Identifiers
+- Core Transferable
 
 ## Sosumi verification notes
 
-During authoring and review, the Sosumi MCP server was used to cross-check concrete Apple symbols and documentation pages. The skill files themselves intentionally refer only to official Apple documentation.
+During authoring and review, the Sosumi MCP server was used to cross-check concrete Apple symbols and documentation pages. The skill files refer only to official Apple documentation.
 
-The following symbols or APIs were explicitly checked this way while building the skill:
+The following symbols, modifiers, and concepts were explicitly verified against Apple's docs while building the skill, with particular attention to availability lines and discussion sections:
 
-- `DocumentGroup`
-- `MenuBarExtra`
-- `ModelActor`
-- `fileImporter`
-- `NSHostingView`
+- `Window`, `WindowGroup`, `Settings`, `DocumentGroup`, `MenuBarExtra`
+- `NavigationSplitView` (and its auto-added sidebar toggle)
+- `Table` (selection, sort, hierarchy, customization)
+- `ToolbarItemPlacement` (semantic vs positional placements; overflow language)
+- `.contextMenu(menuItems:)`, `.contextMenu(forSelectionType:menu:primaryAction:)`
+- `.draggable(_:)`, `.draggable(_:preview:)`
+- `onMoveCommand(perform:)` (macOS / tvOS only — confirmed)
+- `onKeyPress(_:action:)` and variants
+- `@Environment(\.appearsActive)` (replacement for `controlActiveState`)
+- `@Environment(\.backgroundProminence)` (with `List`/`Table` constraint confirmed)
+- `.focusable(_:)`, `@FocusState`
+- `.listRowBackground`, `.tableStyle`
+- `NSHostingView`, `NSHostingController`
+- `NSDraggingSource` (full lifecycle: `willBeginAt`, `movedTo`, `endedAt:operation:`)
+- `NSFilePromiseProvider`
 - `SMAppService`
+- `notarytool`
 
 ## Module-by-module source map
 
 ### `SKILL.md`
 
-Synthesized from the Apple sources below plus the repo’s existing skill structure conventions.
+Synthesized from Apple sources plus the Shape A / Shape B triage rubric derived from observing how real Mac apps split responsibilities between SwiftUI and AppKit.
 
 ### `references/official-sources.md`
 
-Primary basis:
+Primary basis: Apple HIG as design source of truth, Apple Developer docs as API source of truth.
 
-- Apple HIG as the design source of truth
-- Apple Developer docs as the API source of truth
-
-Purpose:
-
-- Make future updates verifiable instead of guess-driven
+Emphasis: making future updates verifiable, with explicit guidance on reading "Available on" lines and Discussion sections that document API constraints.
 
 ### `references/designing-for-macos.md`
 
-Primary basis:
+Primary basis: `Designing for macOS` HIG plus related guidance on windows, menus, toolbars, sidebars, drag and drop, and full-screen.
 
-- `Designing for macOS`
-- related HIG guidance on windows, menus, toolbars, sidebars, drag and drop, and full-screen behavior
-
-Emphasis:
-
-- a review lens that turns Apple’s HIG principles into practical macOS product heuristics
+Emphasis: practical macOS product heuristics, with concrete "iPad-in-a-window" anti-pattern signals.
 
 ### `references/windows-navigation.md`
 
-Primary basis:
+Primary basis: HIG pages for windows, toolbars, sidebars; SwiftUI scene and navigation APIs; AppKit window and split-view APIs.
 
-- HIG pages for windows, toolbars, sidebars, and full-screen behavior
-- SwiftUI scene and navigation APIs
-- AppKit window and split-view APIs
-
-Emphasis:
-
-- standard Mac windowing and navigation patterns over version-fashionable design framing
+Emphasis: matching scene types to workflows; the `ToolbarItemPlacement` non-determinism caveat; when `NSToolbar` beats `.toolbar`.
 
 ### `references/menus-commands-input.md`
 
-Primary basis:
+Primary basis: HIG menu and Dock-menu guidance; SwiftUI command APIs; AppKit menu and responder-chain patterns.
 
-- HIG guidance for menus, the menu bar, Dock menus, and drag-and-drop
-- standard macOS command and shortcut expectations
-- SwiftUI command APIs and AppKit menu/responder-chain patterns
-
-Emphasis:
-
-- standard commands, shortcuts, menus, and drag-and-drop as first-class Mac UI
+Emphasis: standard commands as first-class Mac UI, plus the SwiftUI keyboard and drag-lifecycle gaps with concrete bridging signals.
 
 ### `references/file-management-documents.md`
 
-Primary basis:
+Primary basis: HIG file-management guidance; document-based app patterns; SwiftUI file workflow APIs; AppKit file panels and `NSDocument`.
 
-- HIG file-management guidance
-- Apple document-based app patterns
-- SwiftUI file workflow APIs
-- AppKit file panels, document architecture, and Quick Look integration
-
-Emphasis:
-
-- standard file and document workflows instead of custom file UX
+Emphasis: standard file workflows, security-scoped bookmark balancing, and `NSFilePromiseProvider` for drag-out scenarios SwiftUI doesn't cover.
 
 ### `references/accessibility.md`
 
-Primary basis:
+Primary basis: Apple accessibility guidance for macOS; VoiceOver and accessibility API documentation.
 
-- Apple accessibility guidance for macOS
-- VoiceOver and accessibility API documentation
-
-Emphasis:
-
-- stable accessibility guidance centered on VoiceOver, keyboard navigation, and visual accessibility
+Emphasis: keyboard navigation completeness, the `TextField` focus-trap pattern, and explicit semantics for custom rows that aren't in `List`/`Table`.
 
 ### `references/swiftui-macos.md`
 
-Primary basis:
+Primary basis: SwiftUI scene, navigation, table, command, menu bar, file workflow, focus, drag, and toolbar APIs for macOS; Apple's own discussion of platform-variable placement and the documented constraints on `backgroundProminence`, `appearsActive`, `onMoveCommand`, and `onKeyPress`.
 
-- SwiftUI scene, navigation, table, command, menu bar, file workflow, and focus APIs for macOS
-
-Emphasis:
-
-- SwiftUI patterns that feel native on macOS rather than generic cross-platform usage
+Emphasis: native SwiftUI patterns plus an honest catalogue of the gaps Apple's documentation acknowledges, with concrete trigger signals for when to bridge.
 
 ### `references/appkit-and-bridging.md`
 
-Primary basis:
+Primary basis: AppKit documentation; `NSHostingView` / `NSHostingController` and representable bridging patterns; `NSDraggingSource`, `NSToolbarDelegate`, `NSMenuItemValidation`, and responder-chain documentation.
 
-- AppKit documentation
-- `NSHostingView`
-- standard representable bridging patterns
-
-Emphasis:
-
-- using AppKit deliberately and keeping the AppKit-SwiftUI bridge thin
+Emphasis: concrete trigger signals for when AppKit beats SwiftUI on Mac, with bridging rules and common pitfalls.
 
 ### `references/persistence-and-data.md`
 
-Primary basis:
+Primary basis: SwiftData documentation; document-based app guidance; Apple platform conventions for preferences vs documents vs relational app data; `@SceneStorage` and AppKit window restoration.
 
-- SwiftData documentation
-- document-based app guidance
-- Apple platform conventions for preferences vs documents vs relational app data
-
-Emphasis:
-
-- matching storage technology to the user’s mental model and app shape
+Emphasis: matching storage technology to the user's mental model, with Core Data still acknowledged as a valid choice.
 
 ### `references/platform-capabilities-distribution.md`
 
-Primary basis:
+Primary basis: sandboxing and entitlement guidance; ServiceManagement docs for login items; extension and Quick Look documentation; Apple distribution expectations for signed and notarized Mac apps.
 
-- sandboxing and entitlement guidance
-- ServiceManagement docs for login items
-- extension and Quick Look documentation
-- Apple distribution expectations for signed and notarized Mac apps
+Emphasis: capabilities, entitlements, signing, and distribution as one combined product-and-engineering decision; modern tooling (`notarytool`, `SMAppService`).
 
-Emphasis:
+## What this skill intentionally does not do
 
-- treating capabilities, entitlements, and distribution decisions as both UX and engineering concerns
-
-## What I intentionally removed
-
-During authoring, I discarded any concrete claims that I could not corroborate in Apple’s own documentation. That especially affected version-specific, newly announced, or overly specific platform assertions that named APIs or behaviors without clear support in Apple’s published materials.
+- Recommend SwiftUI workarounds for documented API gaps without naming the gap and the AppKit bridge
+- Make version-specific or newly announced platform claims without verification
+- Treat AppKit as legacy — it isn't; on Mac, it's still the right answer for some app shapes
+- Provide deeper coverage than the most recent macOS release that's been verified against Apple's published docs
 
 ## Install
 
