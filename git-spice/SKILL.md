@@ -59,6 +59,30 @@ git-spice auth login --forge=bitbucket
 
 > **Note:** Bitbucket Cloud does not support PR labels, PR assignees, or template enumeration.
 
+**v0.26.1 behavior change:** git-spice no longer falls back to Git Credential Manager-managed credentials automatically. If a previously-working setup suddenly prompts for auth, run `git-spice auth login` (and pick the GCM method explicitly if that's what you used before).
+
+**Headless / no system keychain?** Select the secret storage backend explicitly to skip the keychain probe (v0.26.0+): set `spice.secret.backend` via `git config` or the `GIT_SPICE_SECRET_BACKEND` environment variable. Check `git-spice auth login -h` and the docs for valid backend names.
+
+#### Fork mode (v0.28.0+)
+
+To contribute to a repo you don't have write access to, point `--upstream` at the project repo and `--remote` at your fork:
+
+```bash
+git-spice repo init --trunk main --upstream upstream --remote origin
+```
+
+In fork mode:
+
+- Branch pushes go to the **push** remote (`--remote`, typically your fork)
+- Change Requests are opened against the **upstream** remote (`--upstream`)
+- `git-spice repo sync` pulls trunk from `upstream`
+- Only trunk-based branches get CRs against upstream; stacked branches whose base isn't trunk are still pushed to your fork as part of the stack
+
+**Caveats:**
+
+- GitHub App authentication is **incompatible** with fork mode — use a Personal Access Token instead.
+- The repository storage format upgrades when fork mode is enabled, and **older git-spice versions cannot open the repo afterward**. Make sure collaborators are on v0.28.0+ before flipping a shared repo into fork mode.
+
 ### 3. Core concepts
 
 - **Branch**: a single node in the stack, backed by a Git branch
@@ -100,7 +124,10 @@ Additional `branch create` flags:
 
 ```bash
 git-spice cc -a -m "feat: additional work"   # commit to current branch, auto-restacks upstack
+git-spice cc -a -F path/to/message.txt       # read message from a file (v0.26.0+, also on bc/ca)
 ```
+
+Pass `-F`/`--message-file` instead of `-m` to read the commit message from a file — useful for multi-line or generated messages.
 
 #### Navigate and inspect the stack
 

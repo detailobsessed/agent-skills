@@ -11,7 +11,7 @@ Covers setup, staging rules, daily workflows, submitting, amending, syncing, and
 The skill covers 10 areas:
 
 1. **Before you start** — consult `git-spice -h` generously
-2. **One-time setup** — `git-spice repo init`, forge config, auth
+2. **One-time setup** — `git-spice repo init`, forge config, auth, fork-mode workflows (v0.28.0+)
 3. **Core concepts** — branch, stack, trunk, submit
 4. **Staging rules** — the most common source of mistakes
 5. **Daily workflow** — creating branches, adding commits, navigating the stack
