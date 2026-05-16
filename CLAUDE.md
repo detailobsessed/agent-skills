@@ -15,8 +15,8 @@ uv sync --locked --group dev
 # Validate all skills against the Agent Skills spec
 uv run python scripts/validate_skills.py
 
-# Run all pre-push checks (validation + typos + markdown lint)
-prek run --all-files agentskills-validate typos markdownlint
+# Run all pre-push checks (validation + typos + markdown lint + python lint/type)
+prek run --all-files agentskills-validate typos markdownlint ruff-check ruff-format ty
 
 # Run full pre-push suite including link checking
 prek run --all-files
@@ -35,7 +35,7 @@ This repo uses `prek` (Rust-based git hook framework). `prek install` installs o
 
 ## CI
 
-GitHub Actions runs on PR and push to main: syncs deps, then runs `prek` with `agentskills-validate typos markdownlint`. The `lychee` link checker is configured in `prek.toml` but not run in CI.
+GitHub Actions runs on PR and push to main: syncs deps, then runs `prek` with `agentskills-validate typos markdownlint ruff-check ruff-format ty`. The `lychee` link checker is configured in `prek.toml` but not run in CI.
 
 ## Adding a New Skill
 
