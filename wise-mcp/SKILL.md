@@ -8,7 +8,7 @@ description: Best practices for building MCP servers with FastMCP, informed by b
 This skill guides you through building high-quality MCP servers using FastMCP (Python). It combines two knowledge sources:
 
 - **FastMCP** — the framework for building MCP servers. Docs: https://gofastmcp.com | LLM-optimized: https://gofastmcp.com/llms-full.txt
-- **Arcade patterns** — 52 battle-tested design patterns for building tools that AI agents can use effectively. Reference: https://www.arcade.dev/patterns | LLM-optimized: https://www.arcade.dev/patterns/llm.txt
+- **Arcade patterns** — 54 battle-tested design patterns for building tools that AI agents can use effectively. Reference: https://www.arcade.dev/patterns | LLM-optimized: https://www.arcade.dev/patterns/llm.txt
 
 > **Always check the latest docs before implementing.** Both FastMCP and the arcade patterns evolve. Fetch the LLM-optimized URLs above to get current guidance before writing any MCP server code.
 
@@ -33,6 +33,8 @@ Fetch the latest documentation before writing any code:
 
 These are LLM-optimized text files designed for agent consumption. Use them as your primary reference throughout implementation. API signatures, decorator options, and best practices may have changed since this skill was written.
 
+**Client-only installs:** if you're building a client, agent, script, or library that only needs to talk to MCP (not host a server), use `fastmcp-slim[client]` (FastMCP 3.3+) instead of the full `fastmcp` package. Same `from fastmcp import Client` import; none of the Starlette/Uvicorn server stack is pulled in.
+
 ### 2. Guiding principles
 
 These cross-cutting concerns apply to every decision you make when building MCP servers:
@@ -55,7 +57,7 @@ Know whether each tool is a query, command, or discovery tool. This classificati
 
 - **Query tools** are read-only, safe to retry, and their results can be cached. Mark them clearly so agents know they're side-effect-free. *(see: QUERY_TOOL)*
 - **Command tools** perform actions with side effects. Document what changes, whether the operation is reversible, and whether confirmation is needed for destructive actions. *(see: COMMAND_TOOL)*
-- **Discovery tools** reveal available operations, schemas, or capabilities. Examples: `list_tables()`, `describe_schema()`, `search_tools()`. These are essential for agents working with dynamic or unfamiliar data. With FastMCP 3.1.0+, `BM25SearchTransform` generates a `search_tools` discovery tool automatically — prefer that over hand-written discovery tools for large catalogs. *(see: DISCOVERY_TOOL)*
+- **Discovery tools** reveal available operations, schemas, or capabilities. Examples: `list_tables()`, `describe_schema()`, `search_tools()`. These are essential for agents working with dynamic or unfamiliar data. With FastMCP 3.1+, `BM25SearchTransform` generates a `search_tools` discovery tool automatically — prefer that over hand-written discovery tools for large catalogs. *(see: DISCOVERY_TOOL)*
 
 #### Write LLM-optimized descriptions
 
@@ -67,6 +69,8 @@ The docstring is your tool's interface to the agent. Invest in it:
 - Describe follow-up actions: "After creating a user, call `assign_role()` to set permissions"
 - Include examples of valid inputs for non-obvious parameters
 - Mention performance characteristics: "This tool queries all records — use `search_users()` for filtered results"
+
+Since FastMCP 3.2.4, parameter descriptions are pulled from your docstring automatically. Write a standard `Args:` / `Parameters:` section and the descriptions land in the tool schema — no need to wrap every parameter in `Field(description=...)`.
 
 *(see: TOOL_DESCRIPTION, PERFORMANCE_HINT)*
 
@@ -87,8 +91,22 @@ Every free-form string parameter is an opportunity for the agent to make a mista
 - **Natural identifiers** — let agents pass human-friendly names (email, username, display name) and resolve to system IDs internally. When ambiguous, return candidates with enough context for the agent to choose. *(see: NATURAL_IDENTIFIER, PARAMETER_COERCION)*
 - **Mutual exclusivity** — if parameters conflict ("exactly one of X or Y"), enforce it in validation and document valid combinations clearly. Don't rely on the agent to read the rules. *(see: MUTUAL_EXCLUSIVITY)*
 - **Batch operations** — when agents need to process multiple items, provide a batch variant that accepts arrays and returns per-item results. This saves round trips and reduces token overhead from repeated tool calls. *(see: BATCH_OPERATION)*
+- **Operation mode** — when a tool can run in distinct modes (preview vs. apply, dry-run vs. commit), make the mode an explicit enum parameter rather than a hidden side effect. Document each mode's behavior; never let "what this does" depend on a non-obvious default. *(see: OPERATION_MODE)*
+- **Tool chains** — when several operations must run in a fixed order and the agent shouldn't deviate, expose a single chained tool that runs the sequence with checkpoints. Easier than asking the agent to remember the choreography. *(see: TOOL_CHAIN)*
+- **Scatter-gather** — for queries across multiple backends, expose a single tool that fans out, collects, and merges results. The agent sees one call; you do the orchestration. *(see: SCATTER_GATHER_TOOL)*
+- **Idempotent operations** — design commands to be safely retryable. Accept an idempotency key for non-idempotent operations (creating a payment, sending an email) so agent retries don't duplicate effects. *(see: IDEMPOTENT_OPERATION)*
 
 Refer to FastMCP docs on the `@mcp.tool` decorator, type hints, and parameter schemas for current API details.
+
+### 3a. Execution model
+
+How a tool runs is part of its contract. Agents reason about latency, retry safety, and cancellation just like callers of any other API. Be explicit.
+
+- **Sync vs. async** — FastMCP runs sync tools in a thread pool by default. If a tool holds thread-local state or is bound to a specific thread (UI frameworks, some database drivers), opt out with `@mcp.tool(run_in_thread=False)` (FastMCP 3.3+). *(see: SYNCHRONOUS_EXECUTION)*
+- **Background tasks for long work** — long-running work belongs in a task, not a synchronous tool call. FastMCP's task primitives let the tool return immediately with a handle the agent can poll. **Tasks are scoped to the authorization context, not the session** (FastMCP 3.2.4+), so they survive session churn and stay tied to who started them. *(see: ASYNC_JOB)*
+- **Transactional boundaries** — when a tool performs multiple writes, document whether they are atomic and what state the system is in on partial failure. If it isn't atomic, say so in the description and surface partial-success information in the response. *(see: TRANSACTIONAL_BOUNDARY)*
+- **Compensation handlers** — for non-atomic multi-step tools, expose an undo/compensate tool when feasible. Agents can recover from a partial failure if you give them a reverse operation. *(see: COMPENSATION_HANDLER)*
+- **Timeout boundaries** — set explicit per-tool timeouts. For anything that may exceed a few seconds, call `ctx.report_progress()` so clients don't kill the call on inactivity heuristics. *(see: TIMEOUT_BOUNDARY)*
 
 ### 4. Resources and resource templates
 
@@ -138,7 +156,7 @@ The FastMCP Context object provides session-scoped capabilities within your tool
 
 #### Core capabilities
 
-- **Dependency injection** — use `CurrentContext()` as a default parameter to access the context object. This works in tools, resources, and prompts.
+- **Dependency injection** — use `CurrentContext()` as a default parameter to access the context object. This works in tools, resources, and prompts. *(see: CONTEXT_INJECTION)*
 - **Logging** — use `ctx.info()`, `ctx.warning()`, `ctx.error()` to send structured log messages back to the client. Use these for operational visibility, not for returning data to the agent.
 - **Progress reporting** — use `ctx.report_progress()` for operations that take more than a few seconds. Without progress signals, agents may assume the tool has hung and retry or abort.
 
@@ -153,7 +171,7 @@ Use `ctx.get_state()` / `ctx.set_state()` to persist data across multiple tool c
 
 - **Resource access** — tools can read resources from within their execution context, enabling tools to compose with resources
 - **LLM sampling** — tools can request LLM completions through the context, enabling tools that leverage LLM reasoning as part of their execution
-- **User elicitation** — tools can request input from the end user when they need clarification that the agent can't provide
+- **User elicitation** — tools can request input from the end user when they need clarification that the agent can't provide. Since FastMCP 3.2.4, always pass an explicit `response_type` to `ctx.elicit()` — calling without one is deprecated. Use `response_title` and `response_description` for clearer prompts
 
 Refer to FastMCP docs on the Context object for the full API and current method signatures.
 
@@ -180,6 +198,10 @@ How you return results matters as much as what you return. Agents consume your o
 - **Next-action hints** — suggest what the agent should do next. This is one of the highest-impact patterns. Include suggested tool names, required parameters, and alternative paths in your response. Example: include a `next_steps` field like `["Call assign_role(user_id='abc', role='admin') to complete setup"]`. *(see: NEXT_ACTION_HINT, DEPENDENCY_HINT)*
 - **Partial success** — for batch operations, report per-item status with summary statistics and retry guidance for failures. Never report a batch as simply "failed" when some items succeeded. *(see: PARTIAL_SUCCESS)*
 - **GUI URLs** — when applicable, include links to view or edit results in a web interface. Agents can surface these to users. *(see: GUI_URL)*
+
+### 7a. Interactive apps and UIs
+
+FastMCP 3.2+ tools can return interactive UIs (charts, tables, forms, dashboards) rendered inline in the conversation, plus five built-in providers (`FileUpload`, `Approval`, `Choice`, `FormInput`, `GenerativeUI`) that cover the most common human-in-the-loop patterns. When to reach for which, and how `FastMCPApp` / `@mcp.tool(app=True)` / `fastmcp dev apps` fit together, lives in `references/apps.md`.
 
 ### 8. Error handling and resilience
 
@@ -229,7 +251,7 @@ FastMCP supports composing multiple servers and sourcing components from various
 
 #### Provider system
 
-FastMCP v3.0 uses providers to source components from different origins:
+FastMCP uses providers to source components from different origins:
 
 - **LocalProvider** — the default. Components registered via decorators on the server instance.
 - **FileSystemProvider** — auto-discovers decorated functions from a directory tree. Each file is self-contained. Great for organizing large servers into modular tool files.
@@ -244,13 +266,13 @@ Transforms modify components after provider aggregation:
 - **Visibility** — controls which components are exposed to clients. Use to hide internal or administrative tools. See *Progressive disclosure* below for a full pattern.
 - **VersionFilter** — filters components by version ranges for API evolution
 - **ResourcesAsTools / PromptsAsTools** — exposes resources and prompts as tools for clients that primarily interact via tools
-- **BM25SearchTransform / RegexSearchTransform** *(FastMCP 3.1.0+)* — replaces `list_tools()` with `search_tools` + `call_tool` synthetic tools for large catalogs. BM25 ranks results by relevance; regex uses pattern matching. Use `always_visible` to pin tools that should always appear in `list_tools`. Preferred over the manual Visibility + gateway pattern for most cases — see *Progressive disclosure* below.
+- **BM25SearchTransform / RegexSearchTransform** — replaces `list_tools()` with `search_tools` + `call_tool` synthetic tools for large catalogs. BM25 ranks results by relevance; regex uses pattern matching. Use `always_visible` to pin tools that should always appear in `list_tools`. Preferred over the manual Visibility + gateway pattern for most cases — see *Progressive disclosure* below.
 
 #### Progressive disclosure
 
-When a server has many tools (10+), exposing all of them at startup wastes context window and degrades agent tool-selection accuracy. FastMCP 3.1.0+ provides two approaches.
+When a server has many tools (10+), exposing all of them at startup wastes context window and degrades agent tool-selection accuracy. FastMCP provides two approaches.
 
-**Preferred: Search transforms (FastMCP 3.1.0+)**
+**Preferred: Search transforms**
 
 Use `BM25SearchTransform` or `RegexSearchTransform` to replace `list_tools()` with a minimal interface. Pin the tools agents need immediately with `always_visible`; everything else is discoverable on demand.
 
@@ -269,7 +291,7 @@ mcp.add_transform(BM25SearchTransform(
 
 This approach is client-safe: `always_visible` tools are always in `list_tools` regardless of whether the client supports `ToolListChangedNotification`.
 
-**Alternative: Visibility + gateway (manual, pre-3.1.0)**
+**Alternative: Visibility + gateway (manual)**
 
 For cases where you need category-based opt-in rather than search:
 
@@ -299,6 +321,9 @@ mcp.add_transform(Visibility(True, tags={"gateway"}, components={"tool"}))
 - **Abstraction ladder** — provide tools at multiple granularity levels. Low-level tools for precise control (`create_file`, `write_bytes`), mid-level for common tasks (`create_document`), and high-level for complex workflows (`draft_report`). Let agents choose the right level. *(see: ABSTRACTION_LADDER)*
 - **Task bundles** — combine multiple operations into a single tool when they always occur together. Name after the task, not the steps: `onboard_user()` instead of `create_user_and_assign_role_and_send_welcome_email()`. *(see: TASK_BUNDLE)*
 - **Gateway pattern** — use a parent server as a unified interface to multiple backends. The agent sees one coherent set of tools; the server routes to the right backend. *(see: TOOL_GATEWAY)*
+- **Canonical tool model** — when wrapping multiple similar APIs (multiple ticket systems, multiple file stores), define one internal data model and convert at the boundary. Agents see one consistent shape regardless of backend. *(see: CANONICAL_TOOL_MODEL)*
+- **Tool adapter** — encapsulate per-backend differences in adapter modules behind the canonical model, so adding a new backend doesn't require new agent-facing tools. *(see: TOOL_ADAPTER)*
+- **Tool versioning** — pair with the `VersionFilter` transform. When evolving a tool's signature, expose `tool_v2` alongside `tool_v1` and let `VersionFilter` route clients by capability. Document the deprecation timeline in the older tool's description. *(see: TOOL_VERSIONING)*
 
 Refer to FastMCP docs on server composition, providers, and transforms for implementation details.
 
@@ -308,7 +333,7 @@ Security is enforced in code, never delegated to the agent via prompts. This is 
 
 #### Credential handling
 
-- **Never accept secrets as tool parameters** — API keys, tokens, and passwords flow through the LLM when passed as parameters. Use the Context to inject credentials at runtime. *(see: SECRET_INJECTION)*
+- **Never accept secrets as tool parameters** — API keys, tokens, and passwords flow through the LLM when passed as parameters. Use the Context to inject credentials at runtime. *(see: SECRET_INJECTION, CONTEXT_INJECTION)*
 - **Use environment variables or secure vaults** for credential storage. The tool reads credentials from a trusted source, never from the agent's input.
 
 #### Authorization
@@ -316,13 +341,14 @@ Security is enforced in code, never delegated to the agent via prompts. This is 
 - **Per-tool auth** — use FastMCP's `require_auth` and `require_scopes` decorators on individual tools to enforce fine-grained access control. *(see: PERMISSION_GATE)*
 - **Server-wide policies** — use `AuthMiddleware` to apply blanket authentication requirements. Combine with tag-based restrictions for role-based access.
 - **Scope declaration** — declare required OAuth scopes per tool. Check before execution. Return clear errors that name the missing scope and how to obtain it. *(see: SCOPE_DECLARATION)*
+- **Audience-bound tokens** — for IdPs that don't natively support RFC 8707, set `forward_resource=True` on the OAuth provider (available on all FastMCP OAuth providers as of 3.2) to bind tokens to the MCP resource URL. Prevents cross-resource token reuse — a token issued for server A can't be replayed against server B.
 
 #### Audit and boundaries
 
 - **Audit trail** — log all tool invocations with: what (tool name + redacted parameters), who (user ID + session ID), when (timestamp), and result (success/failure + duration). This is critical for debugging and compliance. *(see: AUDIT_TRAIL)*
 - **Context boundaries** — define explicit scope limits for tool operations. Restrict file access to specific root paths, data access to specific tenants, and API access to specific endpoints. Never let a tool's blast radius exceed what's necessary. *(see: CONTEXT_BOUNDARY)*
 
-Refer to FastMCP docs on authentication, OAuth proxy, middleware, and `require_auth` / `require_scopes` for implementation.
+Refer to FastMCP docs on authentication, OAuth proxy, middleware, `require_auth` / `require_scopes`, and the auth provider catalog (Google, GitHub, AWS Cognito, Azure, Azure AD B2C, Clerk, Keycloak, WorkOS / AuthKit, PropelAuth, Discord, OCI) for implementation.
 
 ### 11. Anti-patterns to avoid
 
@@ -339,3 +365,6 @@ These are the most common mistakes when building MCP servers. Each one degrades 
 - **Security via prompts** — relying on system prompts or tool descriptions to enforce access control. Prompts can be overridden or ignored. Enforce security in code.
 - **Monolithic servers** — putting every tool in one server. Use composition to keep servers focused. An agent connecting to a 50-tool server has worse tool selection accuracy than one connecting to five 10-tool servers via mounting.
 - **Missing next-action hints** — returning results without guidance on what to do next. Every response is an opportunity to help the agent make progress.
+- **Using deprecated tool middlewares** — `PromptToolMiddleware` and `ResourceToolMiddleware` are deprecated as of FastMCP 3.2. Use the `ResourcesAsTools` / `PromptsAsTools` transforms instead.
+- **Calling `ctx.elicit()` without `response_type`** — deprecated as of FastMCP 3.2.4. Always pass an explicit `response_type`; use `response_title` and `response_description` for clearer prompts.
+- **No production discovery surface** — production servers should expose a registry/schema-explorer for runtime tool discovery, capability matching for client negotiation, and a health-check endpoint for monitoring. Easy to forget when iterating on tool design. *(see: TOOL_REGISTRY, SCHEMA_EXPLORER, CAPABILITY_MATCHING, HEALTH_CHECK)*
