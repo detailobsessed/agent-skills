@@ -116,13 +116,24 @@ def check_baseline(skill_dir: Path) -> list[Finding]:
     """Defer name/description regex + reserved words to upstream `agentskills`.
     We only surface its exit status here; the CLI prints its own diagnostics.
     """
-    result = subprocess.run(
-        ["uv", "run", "agentskills", "validate", skill_dir.name],
-        cwd=REPO_ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    try:
+        result = subprocess.run(
+            ["uv", "run", "agentskills", "validate", skill_dir.name],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except FileNotFoundError:
+        return [
+            Finding(
+                "error",
+                "baseline-unavailable",
+                "`uv` was not found on PATH; cannot run `agentskills validate`. "
+                "Install uv (https://docs.astral.sh/uv/) so baseline validation can run.",
+                "agentskills.io/specification#frontmatter",
+            )
+        ]
     if result.returncode == 0:
         return []
     detail = (result.stdout + result.stderr).strip() or "(no detail)"
@@ -349,7 +360,7 @@ def check_reference_tocs(skill_dir: Path) -> list[Finding]:
         return findings
     for ref in sorted(refs_dir.glob("*.md")):
         text = ref.read_text(encoding="utf-8")
-        line_count = text.count("\n") + 1
+        line_count = text.count("\n") + (0 if text.endswith("\n") else 1)
         if line_count <= REFERENCE_TOC_THRESHOLD_LINES:
             continue
         # Check the first 30 lines for a TOC heading.
