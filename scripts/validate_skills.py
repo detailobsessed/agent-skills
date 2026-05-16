@@ -25,9 +25,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # Limits drawn directly from the spec / best-practices docs. The numbers are
 # not invented here — adjust the URL and rationale together if they change.
 MAX_BODY_LINES = 500  # "Keep your main SKILL.md under 500 lines"
-MAX_BODY_WORDS = (
-    5000  # "<5000 tokens recommended" (1 token ~= 1 word for English prose)
-)
+MAX_BODY_WORDS = 5000  # "<5000 tokens recommended" (1 token ~= 1 word for English prose)
 MAX_DESCRIPTION_LEN = 1024  # spec MUST
 MAX_NAME_LEN = 64  # spec MUST
 MAX_COMPATIBILITY_LEN = 500  # spec MUST when present
@@ -138,9 +136,7 @@ def check_baseline(skill_dir: Path) -> list[Finding]:
     ]
 
 
-def check_directory_name_matches(
-    skill_dir: Path, props: dict[str, object]
-) -> list[Finding]:
+def check_directory_name_matches(skill_dir: Path, props: dict[str, object]) -> list[Finding]:
     """Spec MUST: `name` field must match the parent directory name."""
     name = props.get("name")
     if not isinstance(name, str):
@@ -188,9 +184,7 @@ def check_body_length(skill_dir: Path, body: str) -> list[Finding]:
     return findings
 
 
-def check_description_quality(
-    skill_dir: Path, props: dict[str, object]
-) -> list[Finding]:
+def check_description_quality(skill_dir: Path, props: dict[str, object]) -> list[Finding]:
     """Best-practices: third-person voice, contains a `Use when` trigger."""
     desc = props.get("description")
     if not isinstance(desc, str):
@@ -393,9 +387,7 @@ def check_time_sensitive_phrasing(skill_dir: Path, skill_md_text: str) -> list[F
     return findings
 
 
-def check_reserved_words_in_name(
-    skill_dir: Path, props: dict[str, object]
-) -> list[Finding]:
+def check_reserved_words_in_name(skill_dir: Path, props: dict[str, object]) -> list[Finding]:
     """Best-practices says 'anthropic' and 'claude' are reserved words for the
     name field. The upstream CLI may already check this; we duplicate for safety.
     """
@@ -424,9 +416,7 @@ def get_skill_directories() -> list[Path]:
     skills = sorted(
         path
         for path in REPO_ROOT.iterdir()
-        if path.is_dir()
-        and not path.name.startswith(".")
-        and (path / "SKILL.md").is_file()
+        if path.is_dir() and not path.name.startswith(".") and (path / "SKILL.md").is_file()
     )
     if not skills:
         raise SystemExit("No skill directories with SKILL.md were found.")
@@ -462,15 +452,9 @@ def _color(s: str, code: str) -> str:
 
 
 def _render_finding(f: Finding) -> str:
-    badge = (
-        _color("ERROR  ", "31") if f.severity == "error" else _color("WARN   ", "33")
-    )
+    badge = _color("ERROR  ", "31") if f.severity == "error" else _color("WARN   ", "33")
     loc = f"  {_color(f.location, '36')}" if f.location else ""
-    return (
-        f"  {badge} [{f.code}]{loc}\n"
-        f"    {f.message}\n"
-        f"    spec: {_color(f.spec_ref, '90')}"
-    )
+    return f"  {badge} [{f.code}]{loc}\n    {f.message}\n    spec: {_color(f.spec_ref, '90')}"
 
 
 def _summary_line(findings: Iterable[Finding]) -> str:
@@ -500,11 +484,7 @@ def main() -> int:
 
     print()
     if total_errors:
-        print(
-            _color(
-                f"FAILED: {total_errors} error(s), {total_warnings} warning(s).", "31"
-            )
-        )
+        print(_color(f"FAILED: {total_errors} error(s), {total_warnings} warning(s).", "31"))
         return 1
     if total_warnings:
         print(_color(f"OK with {total_warnings} warning(s).", "33"))
