@@ -1,6 +1,7 @@
 # Step CLI, Maven Plugin, and Deployment
 
 > Live docs:
+>
 > - Step CLI: https://step.dev/knowledgebase/devops/automation-package-cli/step-cli/
 > - Maven plugin: https://step.dev/knowledgebase/devops/automation-package-cli/ap-maven-plugin/
 > - Automation as Code (CI/CD context): https://step.dev/knowledgebase/devops/automation-as-code/
@@ -29,6 +30,7 @@
 ## Step CLI overview
 
 The Step CLI handles all Automation Package operations:
+
 - Execute packages locally or remotely on a Step server
 - Deploy packages to a Step server (full installation with schedule activation)
 - Deploy libraries independently
@@ -42,6 +44,7 @@ The Step CLI handles all Automation Package operations:
 - **Step Enterprise**: download from the Enterprise download section
 
 Requirements:
+
 - Use the same CLI version as your Step server
 - Java JRE 11+ must be installed
 
@@ -74,7 +77,7 @@ step ap execute --local
 
 Add a `.apignore` file to the package root to exclude files during packaging. Same syntax as `.gitignore`.
 
-```
+```text
 /ignored-folder
 /ignoredFile.yml
 ```
@@ -95,6 +98,7 @@ step ap execute --local -p /path/to/package/
 ### Limitations
 
 Local execution does not support:
+
 - Node.js keywords
 - .NET keywords
 - SoapUI keywords
@@ -173,6 +177,7 @@ step ap deploy \
 ### Deploy with libraries
 
 Same syntax as execute:
+
 ```bash
 step ap deploy -p ./package.jar -l ./library.jar
 step ap deploy -p ./package.jar -l mvn:group:artifact:version
@@ -182,6 +187,7 @@ step ap deploy -p ./package.jar -l managed:MyCommonJavaLib
 ### Force refresh of SNAPSHOT artifacts
 
 When other packages in the same tenant use the same SNAPSHOT coordinate:
+
 ```bash
 step ap deploy -p ./package-SNAPSHOT.jar -l mvn:group:artifact:version-SNAPSHOT --forceRefreshOfSnapshots
 ```
@@ -220,12 +226,14 @@ The activation expression (Groovy) determines which version is selected at runti
 Select which plans to execute:
 
 ### By name
+
 ```bash
 step ap execute --includePlans=PlanA,PlanB
 step ap execute --excludePlans=SkipThisPlan
 ```
 
 ### By category
+
 ```bash
 step ap execute --includeCategories=FunctionalTest,Playwright
 step ap execute --excludeCategories=PerformanceTest
@@ -266,6 +274,7 @@ All CLI options can be defined in configuration files.
 ### Example
 
 `~/stepcli.properties`:
+
 ```properties
 stepUrl=https://my-step-server.example.com
 token=<API_KEY>
@@ -273,6 +282,7 @@ projectName=Common
 ```
 
 `jmeter_cli.properties` (project-specific):
+
 ```properties
 projectName=JMeter_Tests
 ```
@@ -285,11 +295,13 @@ step ap execute -c jmeter_cli.properties
 ### Execution parameters
 
 Use the `|` delimiter for multiple parameters in config files:
+
 ```properties
 executionParameters=myParam1=myValue1|myParam2=myValue2
 ```
 
 On the command line, use `-ep` for each parameter:
+
 ```bash
 step ap execute -ep myParam1=myValue1 -ep myParam2=myValue2
 ```
@@ -369,6 +381,7 @@ public class RunAutomationPackageTest {}
 Three approaches:
 
 **1. Annotation:**
+
 ```java
 @RunWith(Step.class)
 @ExecutionParameters({"MyParam1", "Value of param 1", "MyParam2", "Value of param 2"})

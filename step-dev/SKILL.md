@@ -36,6 +36,7 @@ These are the building blocks you need to understand before diving into any refe
 Keywords are the fundamental building blocks of Plans. They encapsulate automation logic — anything from a single API call to a full browser-driven workflow. Step integrates natively with Selenium, Cypress, Playwright, Appium, JMeter, K6, and others, but also supports custom keywords in Java, .NET, and JavaScript/TypeScript via the Keyword API.
 
 Key characteristics:
+
 - **Stateless by default** — a new instance is created per execution, released afterward
 - **Stateful via sessions** — share data across keyword executions within a workflow using the session object
 - **Lifecycle hooks** — optional `beforeKeyword`, `afterKeyword`, and `onError` hooks for setup, cleanup, and error handling

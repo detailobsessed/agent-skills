@@ -1,6 +1,7 @@
 # Automation Packages and YAML Descriptor
 
 > Live docs:
+>
 > - Automation Packages overview: https://step.dev/knowledgebase/devops/automation-packages-overview/
 > - Automation Package Descriptor: https://step.dev/knowledgebase/devops/automation-package-yaml/
 > - Automation Package in Java: https://step.dev/knowledgebase/devops/automation-package-java/
@@ -32,6 +33,7 @@
 An Automation Package is a self-contained set of Plans and their related entities (Keywords, Parameters, Resources, Schedules, Alerting Rules) that can be executed on a Step controller or deployed to it for later use.
 
 The standard consists of:
+
 - **Automation Package syntax** — a declarative YAML format for describing automation workflows
 - **Automation Package format** — a standard for packaging entities (JAR, ZIP, Folder, DLL)
 - **Automation Package CLI** — tools to build, execute, and deploy packages
@@ -41,7 +43,7 @@ The standard consists of:
 ## Supported entities
 
 | Entity | Description |
-|---|---|
+| --- | --- |
 | **Keywords** | Encapsulate automation logic — the building blocks of plans |
 | **Plans** | Define the operational logic Step performs |
 | **Parameters** | Key/value pairs for modular, environment-specific workflows |
@@ -55,7 +57,7 @@ The standard consists of:
 ## Package operations
 
 | Operation | Description |
-|---|---|
+| --- | --- |
 | **Package** | Create an archive from the entities (bundling step) |
 | **Publish** | Upload to an artifact repository without further action |
 | **Deploy** | Upload to a Step server, make all entities available, activate schedules and alerting rules |
@@ -69,7 +71,7 @@ The standard consists of:
 
 Standard JAR containing compiled Java classes, dependencies, and `automation-package.yaml` at the root. Built with Maven or any Java build tool.
 
-```
+```text
 META-INF/              # jar metadata
 step/                  # Java classes - keywords
 org/                   # Java classes - dependencies
@@ -80,7 +82,7 @@ automation-package.yaml
 
 Standard ZIP archive with `automation-package.yaml` at the root plus any referenced resources.
 
-```
+```text
 automation-package.yaml
 Demo_JMeter.jmx        # JMeter test plan
 opencart-test.js        # K6 script
@@ -116,7 +118,7 @@ fragments:               # optional (include modular YAML files)
 ### Schema versions
 
 | Version | Description | Step compatibility |
-|---|---|---|
+| --- | --- | --- |
 | 1.2.0 | Password-protected data sources and Excel files | 29.x+ |
 | 1.1.1 | K6 directory support | 28.x+ |
 | 1.1.0 | Before & after sections in plans | 27.x |
@@ -209,6 +211,7 @@ keywords:
 ## Plans in YAML
 
 Plans are tree structures with a required `root` node defining the plan type. Common node properties:
+
 - `nodeName` (optional) — node name
 - `categories` (optional) — categories for filtering
 - `description` (optional) — description text
@@ -244,6 +247,7 @@ plans:
 ### Thread group (load testing)
 
 With literal values:
+
 ```yaml
 - threadGroup:
     users: 5
@@ -254,6 +258,7 @@ With literal values:
 ```
 
 With dynamic expressions (Groovy):
+
 ```yaml
 - threadGroup:
     users:
@@ -290,6 +295,7 @@ plans:
 ### Agent provisioning (Kubernetes)
 
 Auto-detect agents:
+
 ```yaml
 plans:
   - name: "My Plan"
@@ -297,6 +303,7 @@ plans:
 ```
 
 Manual specification:
+
 ```yaml
 plans:
   - name: "My Plan"
@@ -309,6 +316,7 @@ plans:
 ### Plain text plans
 
 Include existing plain text plan files:
+
 ```yaml
 plansPlainText:
   - file: "plans/this-is-a-plain-text-plan.plan"
@@ -504,7 +512,8 @@ Libraries can be provided as files, Maven coordinates, or managed libraries (ref
 ## IDE setup
 
 Download the JSON schema from your Step instance:
-```
+
+```text
 https://<your-step-instance>/rest/automation-packages/schema
 ```
 

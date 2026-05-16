@@ -1,6 +1,7 @@
 # Keywords — Development and API
 
 > Live docs:
+>
 > - Keyword Development: https://step.dev/knowledgebase/devdocs/keyword-development/
 > - Keyword API: https://step.dev/knowledgebase/devdocs/keywordapi/
 > - Tutorials: https://step.dev/tutorials/basic-keyword-development/
@@ -29,6 +30,7 @@
 A custom keyword is a user-defined block of automation logic implemented in code. Unlike plugin-based keywords (Cypress, JMeter, K6, etc.), custom keywords let you integrate any tool, framework, or library into Step workflows.
 
 The Keyword API provides the interface to:
+
 - Define and configure keywords using annotations and class extensions
 - Access keyword inputs, session objects, and report data
 - Implement hooks for pre/post execution and error management
@@ -51,6 +53,7 @@ public class MyKeywords extends AbstractKeyword {
 ```
 
 The `@Keyword` annotation supports these attributes:
+
 - `name` — custom keyword name (defaults to method name)
 - `schema` — JSON schema for inputs
 - `description` — description shown in Step UI
@@ -83,12 +86,14 @@ exports.MyKeyword = async (input, output, session, properties) => {
 ```
 
 Each keyword receives four arguments:
+
 - **input** — input parameters from the Step plan, as a plain object
 - **output** — an `OutputBuilder` for return values, errors, and attachments
 - **session** — a Map scoped to the token's lifetime for sharing state between keyword calls
 - **properties** — flat key/value map of agent and token properties configured in Step
 
 Three optional module-level hooks can be exported alongside keywords:
+
 - `beforeKeyword(functionName)` — called before each keyword execution
 - `afterKeyword(functionName)` — called after each keyword execution, even on failure
 - `onError(exception, input, output, session, properties)` — called on error; return `true` to propagate, `false` to suppress
@@ -102,12 +107,14 @@ Keyword inputs are passed as a JSON object with open types. The developer choose
 ### Reading inputs in code
 
 **Java** (via inherited `input` object):
+
 ```java
 String homeUrl = input.getString("url");
 int elementIndex = input.getInt("index", 1);
 ```
 
 **Java** (via method arguments with `@Input` annotation — recommended):
+
 ```java
 @Keyword
 public void myKeyword(
@@ -122,11 +129,13 @@ public void myKeyword(
 Supported `@Input` types: `String`, `Integer`/`int`, `Long`/`long`, `Double`/`double`, `BigDecimal`, `BigInteger`, arrays/collections of supported types, Maps of strings to supported types, and POJOs with accessible fields.
 
 **.NET**:
+
 ```csharp
 string homeUrl = (string)input["url"];
 ```
 
 **JavaScript**:
+
 ```javascript
 var homeUrl = input['url'];
 ```
@@ -134,12 +143,14 @@ var homeUrl = input['url'];
 ### Passing inputs from code (for testing)
 
 **Java** (with `KeywordRunner`):
+
 ```java
 ExecutionContext ctx = KeywordRunner.getExecutionContext(properties, this.getClass());
 Output<JsonObject> output = ctx.run("MyKeyword", "{\"url\":\"http://www.example.com\", \"index\": 3}");
 ```
 
 **JavaScript** (with `runner`):
+
 ```javascript
 const runner = require('step-node-agent/api/runner/runner')({
     myProperty: 'value'  // equivalent to agent properties
@@ -214,6 +225,7 @@ The execution flow of a keyword:
 ### Implementing hooks
 
 **Java**:
+
 ```java
 @Override
 public void beforeKeyword(String keywordName, Keyword annotation) {
@@ -233,6 +245,7 @@ public boolean onError(Exception e) {
 ```
 
 **JavaScript** (module-level exports):
+
 ```javascript
 exports.beforeKeyword = async (functionName) => {
     console.log('Before:', functionName)
@@ -253,7 +266,7 @@ exports.onError = async (exception, input, output, session, properties) => {
 ## Stateless vs stateful keywords
 
 | Feature | Stateless | Stateful |
-|---|---|---|
+| --- | --- | --- |
 | Instance lifecycle | New instance per execution | Data shared via session |
 | Data persistence | None between executions | Persists in session across workflow |
 | Use case | Idempotent, isolated operations | Workflows needing shared state |
@@ -265,6 +278,7 @@ Use the session when keywords within a workflow need to share state — for exam
 The session is only available when keyword calls are grouped using the `Session` control in a plan. Objects stored in the session must implement `Closeable` or `AutoCloseable` to be cleaned up when the session is released.
 
 **Java**:
+
 ```java
 // Store in session
 session.put("browser", browser);
@@ -274,6 +288,7 @@ WebDriver browser = (WebDriver) session.get("browser");
 ```
 
 **JavaScript**:
+
 ```javascript
 // Store in session
 session.set('browser', browser)
@@ -292,6 +307,7 @@ const browser = session.get('browser')
 - **Technical errors** — unexpected exceptions (null pointer, connection timeout). Any uncaught exception is reported as a technical error. Catch and categorize them explicitly when possible.
 
 **Java**:
+
 ```java
 try {
     // automation logic
@@ -305,6 +321,7 @@ try {
 ```
 
 **JavaScript**:
+
 ```javascript
 try {
     // automation logic
@@ -322,6 +339,7 @@ Measurements track execution timing for analytics. A default measurement is crea
 Measurements work in a stack — `stopMeasure()` closes the most recently opened one.
 
 **Java**:
+
 ```java
 output.startMeasure("NavigateToPage");
 // do navigation
@@ -335,6 +353,7 @@ output.stopMeasure(data);  // stops NavigateToPage with analytics data
 ```
 
 **JavaScript**:
+
 ```javascript
 output.startMeasure('Navigate')
 // do something
@@ -362,6 +381,7 @@ Starting with Keyword API version 1.5.0 (Step 29), you can assign an explicit st
 The Keyword Proxy lets a parent keyword invoke child keywords directly from code, creating workflows without using Step plans. Java only.
 
 Key features:
+
 - Automatically shares the parent keyword's context (session, properties)
 - Manages output propagation (merge all outputs or set manually)
 - Creates measurements for all individual keyword calls
@@ -415,6 +435,7 @@ See the Keyword API javadoc for streaming file upload and advanced features.
 ### Resource management
 
 Clean up all resources explicitly — browsers, WebDriver instances, database connections, file handles, downloaded files. Approaches:
+
 1. Try/finally in the keyword function itself (simplest)
 2. `afterKeyword` hook (always runs, even on failure)
 3. Store resources in session with `Closeable`/`AutoCloseable` — cleaned up when session closes
