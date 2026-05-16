@@ -5,7 +5,6 @@
 > - Maven plugin: https://step.dev/knowledgebase/devops/automation-package-cli/ap-maven-plugin/
 > - Automation as Code (CI/CD context): https://step.dev/knowledgebase/devops/automation-as-code/
 > - Automation Package in Java (JUnit): https://step.dev/knowledgebase/devops/automation-package-java/
-> - Getting started: https://step.dev/knowledgebase/devops/getting-started-with-automation-packages/
 
 ## Table of contents
 

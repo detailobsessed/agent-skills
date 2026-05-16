@@ -6,7 +6,7 @@
 > - Tutorials: https://step.dev/tutorials/basic-keyword-development/
 > - Java samples: https://github.com/exense/step-samples/tree/master/keywords/java
 > - JS samples: https://github.com/exense/step-node/tree/master/examples
-> - .NET samples: https://github.com/exense/step-samples/tree/master/keywords/dotnet50
+> - .NET samples: https://github.com/exense/step-samples/tree/master/keywords/dotnet80
 
 ## Table of contents
 

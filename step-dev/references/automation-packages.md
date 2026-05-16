@@ -6,7 +6,6 @@
 > - Automation Package in Java: https://step.dev/knowledgebase/devops/automation-package-java/
 > - Automation Package Libraries: https://step.dev/knowledgebase/devops/automation-package-libraries/
 > - Multi-version support: https://step.dev/knowledgebase/devops/automation-package-multi-version/
-> - Getting started: https://step.dev/knowledgebase/devops/getting-started-with-automation-packages/
 
 ## Table of contents
 
