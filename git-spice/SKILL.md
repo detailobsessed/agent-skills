@@ -182,7 +182,35 @@ To submit only the current branch's MR:
 git-spice branch submit --fill --no-draft
 ```
 
-### 7. Amending commits in the stack
+### 7. Merging the stack
+
+Merge the entire stack bottom-up into trunk in one command:
+
+```bash
+git-spice stack merge                  # merge current branch's full stack
+git-spice stack merge --branch B       # merge a different branch's stack
+git-spice stack merge --fail-fast      # stop on first failure (default: skip blocked + children)
+```
+
+Branches merge bottom-up starting with those stacked on trunk. After each branch
+merges, its upstack branches are restacked and resubmitted; when they become
+ready, they merge in turn. A branch is "ready" when the forge reports it
+mergeable (configurable via `spice.merge.ready.command`). If a branch is blocked
+or times out, it and its upstack children are skipped unless `--fail-fast` is set.
+
+Flags:
+
+- `--method` — `merge`, `squash`, or `rebase` (🔧 `spice.merge.method`)
+- `--ready-timeout` — max wait for merge readiness per branch (default 30m; 0 = check once)
+- `--merge-timeout` — max wait for merge completion after requesting (default 2m)
+- `--fail-fast` — stop scheduling remaining merges after first failure
+
+This is a sequential bottom-up merge, not a parallel merge queue (Aviator/Mergify
+style). For solo use it's sufficient — run it when the stack is ready and it
+walks up the chain. There's also `git-spice branch merge` for a single branch
+and `git-spice downstack merge` for a branch and those below it.
+
+### 8. Amending commits in the stack
 
 To change the current branch's commit (fix a bug, address review feedback):
 
@@ -208,7 +236,7 @@ git-spice stack submit --update-only        # propagates rebase upward automatic
 
 If no commit hash is given, an interactive prompt lets you pick the target commit. Requires Git 2.45+.
 
-### 8. Syncing after merges
+### 9. Syncing after merges
 
 After MRs are merged on the forge (bottom-up), sync locally to clean up:
 
@@ -217,7 +245,7 @@ git-spice repo sync --restack               # pulls trunk, removes merged branch
 git-spice stack submit --update-only        # updates MR targets on the forge (if branches remain)
 ```
 
-### 9. Other useful commands
+### 10. Other useful commands
 
 #### Tracking and switching
 
@@ -285,7 +313,7 @@ git-spice upstack submit                    # submit current branch and all abov
 git-spice downstack submit                  # submit current branch and all below it
 ```
 
-### 10. Anti-patterns
+### 11. Anti-patterns
 
 - **Forgetting to stage changes** — use `-a` to auto-stage tracked files, or `git add` for new untracked files. Without either, commits will be empty or incomplete.
 - **Manually rebasing instead of using git-spice restack commands** — git-spice tracks branch relationships in `.git/spice/`; a manual `git rebase` does not update this metadata.
