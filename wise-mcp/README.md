@@ -3,15 +3,17 @@
 [![Agent Skill](https://img.shields.io/badge/Agent_Skill-compatible-blue?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPjxwYXRoIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTUtMTAtNXoiLz48cGF0aCBkPSJNMiAxN2wxMCA1IDEwLTUiLz48cGF0aCBkPSJNMiAxMmwxMCA1IDEwLTUiLz48L3N2Zz4=)](https://agentskills.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![FastMCP](https://img.shields.io/badge/FastMCP-gofastmcp.com-purple)](https://gofastmcp.com)
-[![Arcade Patterns](https://img.shields.io/badge/Arcade-52_patterns-orange)](https://www.arcade.dev/patterns)
+[![Arcade Patterns](https://img.shields.io/badge/Arcade-54_patterns-orange)](https://www.arcade.dev/patterns)
 
 An [Agent Skill](https://agentskills.io) for building high-quality MCP servers with [FastMCP](https://gofastmcp.com).
 
 Combines FastMCP framework guidance with battle-tested design patterns from [Arcade](https://www.arcade.dev/patterns) to help AI agents build MCP servers that are well-structured, secure, and optimized for LLM consumption.
 
+Baselined on **FastMCP 3.4.5**, with a dedicated section on what the **FastMCP 4 prerelease** changes.
+
 ## What's in the skill
 
-The skill covers 11 areas of MCP server development:
+The skill covers 12 areas of MCP server development:
 
 1. **Before you start** — always fetch latest docs
 2. **Guiding principles** — machine experience, tool DAGs, error-guided recovery, security boundaries
@@ -21,9 +23,10 @@ The skill covers 11 areas of MCP server development:
 6. **Context & state** — dependency injection, logging, progress, session state
 7. **Tool output** — response shaping, token efficiency, pagination, next-action hints
 8. **Error handling** — recovery-oriented errors, classification, ambiguity handling
-9. **Server composition** — mounting, providers, transforms, abstraction patterns
-10. **Authentication & security** — credential handling, authorization, audit, boundaries
+9. **Server composition** — mounting, providers, transforms, progressive disclosure, Code Mode
+10. **Authentication & security** — credential handling, authorization, transport hardening, audit
 11. **Anti-patterns** — common mistakes that degrade agent effectiveness
+12. **FastMCP 4** — the sessionless protocol, removed surfaces, and what replaces them
 
 ## Install
 
