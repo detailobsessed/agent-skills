@@ -1,0 +1,10 @@
+# Spell-check configuration for the `typos` pre-push hook.
+#
+# These skills document CLI flags, config keys, and API symbols verbatim. When a
+# literal value looks like a misspelling, typos rewrites it in place and silently
+# breaks the documentation. Declare such literals here rather than letting the
+# hook "correct" them.
+
+[default.extend-words]
+# git-spice `--restack` accepts none | aboves | upstack
+aboves = "aboves"

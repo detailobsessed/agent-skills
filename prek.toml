@@ -6,6 +6,17 @@ default_stages = ["pre-commit"]
 minimum_prek_version = "0.3.4"
 default_install_hook_types = ["pre-push"]
 
+# Tag-eligibility rules for `prek update`. Without these, `update` picked lychee's
+# `nightly` tag — a moving prerelease republished daily, which defeats reproducible
+# hook installs and which prek then cannot detect changes to after first install.
+[update]
+exclude_tags = ["nightly"]
+
+# lychee publishes two tag series from one repo: `lychee-v*` (the CLI, what the hook
+# runs) and `lychee-lib-v*` (the library crate). Pin updates to the CLI series.
+[update.repos."https://github.com/lycheeverse/lychee"]
+include_tags = ["lychee-v*"]
+
 [[repos]]
 repo = "builtin"
 hooks = [
@@ -24,12 +35,12 @@ hooks = [
 
 [[repos]]
 repo = "https://github.com/crate-ci/typos"
-rev = "v1.46.1"  # prek autoupdate will fill this
+rev = "v1.49.0"  # prek autoupdate will fill this
 hooks = [{ id = "typos", priority = 1, stages = ["pre-push"] }]
 
 [[repos]]
 repo = "https://github.com/astral-sh/ruff-pre-commit"
-rev = "v0.15.13"
+rev = "v0.16.1"
 hooks = [
   { id = "ruff-check", priority = 1, stages = ["pre-push"] },
   { id = "ruff-format", args = ["--check"], priority = 1, stages = ["pre-push"] },
@@ -62,7 +73,7 @@ hooks = [
 
 [[repos]]
 repo = "https://github.com/igorshubovych/markdownlint-cli"
-rev = "v0.48.0"
+rev = "v0.49.1"
 hooks = [
   {
     id = "markdownlint",
@@ -74,7 +85,7 @@ hooks = [
 
 [[repos]]
 repo = "https://github.com/lycheeverse/lychee"
-rev = "lychee-v0.24.2"  # lychee tags nightly as latest; prek autoupdate may switch to it
+rev = "lychee-v0.24.2"  # tag series constrained in [update.repos] above
 hooks = [
   {
     id = "lychee",
