@@ -11,6 +11,11 @@ This skill guides you through building high-quality MCP servers using FastMCP (P
 - **Arcade patterns** — 54 battle-tested design patterns for building tools that AI agents can use effectively. Reference: https://www.arcade.dev/patterns | LLM-optimized: https://www.arcade.dev/patterns/llm.txt
 
 > **Always check the latest docs before implementing.** Both FastMCP and the arcade patterns evolve. Fetch the LLM-optimized URLs above to get current guidance before writing any MCP server code.
+>
+> **Version baseline: FastMCP 3.4.5.** Everything below describes the stable 3.x line unless marked
+> otherwise. **FastMCP 4 is in prerelease** and removes surfaces this skill documents.
+> `gofastmcp.com` now documents 4.x, so a doc page and this skill can disagree — when they do, check
+> which line the target project is on. See §12 before writing 4.x code against §6 or §9.
 
 ## When to use
 
@@ -32,6 +37,10 @@ Fetch the latest documentation before writing any code:
 - Read https://www.arcade.dev/patterns/llm.txt for the full pattern catalog with explanations
 
 These are LLM-optimized text files designed for agent consumption. Use them as your primary reference throughout implementation. API signatures, decorator options, and best practices may have changed since this skill was written.
+
+**Establish the target version first.** Check whether the project is on 3.x or the 4.x prerelease
+before reading further — several sections below differ by line, and `gofastmcp.com` documents 4.x.
+`uv pip show fastmcp` or the `pyproject.toml` pin answers it.
 
 **Client-only installs:** if you're building a client, agent, script, or library that only needs to talk to MCP (not host a server), use `fastmcp-slim[client]` (FastMCP 3.3+) instead of the full `fastmcp` package. Same `from fastmcp import Client` import; none of the Starlette/Uvicorn server stack is pulled in.
 
@@ -162,6 +171,11 @@ The FastMCP Context object provides session-scoped capabilities within your tool
 
 #### Session state
 
+> **This whole subsection is 3.x-shaped.** It assumes a session exists to hang state on. The modern
+> protocol (`2026-07-28`) is stateless by design, and FastMCP 4 replaces session state with
+> `UserSession` / `SessionId`. The *patterns* below survive the transition; the *mechanism* does
+> not. See §12.
+
 Use `ctx.get_state()` / `ctx.set_state()` to persist data across multiple tool calls within the same session. This is essential for two patterns:
 
 - **Identity anchor** — establish who the user is at the start of a session. A `who_am_i()` tool that sets the user context in state means subsequent tools can access user ID, roles, and permissions without requiring them as parameters. *(see: IDENTITY_ANCHOR)*
@@ -170,7 +184,7 @@ Use `ctx.get_state()` / `ctx.set_state()` to persist data across multiple tool c
 #### Advanced context features
 
 - **Resource access** — tools can read resources from within their execution context, enabling tools to compose with resources
-- **LLM sampling** — tools can request LLM completions through the context, enabling tools that leverage LLM reasoning as part of their execution
+- **LLM sampling** — `ctx.sample()` requests completions from the *caller's* model. **Removed from the server API in FastMCP 4**: sampling pushes a request down a live connection the sessionless protocol doesn't have. If borrowing the caller's model is the point of your server, FastMCP's own guidance is to stay on 3.x. `ctx.list_roots()` goes for the same reason; the *client* side is unaffected.
 - **User elicitation** — tools can request input from the end user when they need clarification that the agent can't provide. Since FastMCP 3.2.4, always pass an explicit `response_type` to `ctx.elicit()` — calling without one is deprecated. Use `response_title` and `response_description` for clearer prompts
 
 Refer to FastMCP docs on the Context object for the full API and current method signatures.
@@ -237,6 +251,32 @@ Distinguish between error types so agents can respond appropriately:
 - **Graceful degradation** — return partial results when full operation isn't possible. Note what worked, what failed, and suggest remediation for the failures. *(see: GRACEFUL_DEGRADATION)*
 - **Fallback tools** — when a primary data source or service is unavailable, provide an alternative path. Indicate when a fallback was used so the agent knows the results may be incomplete. *(see: FALLBACK_TOOL)*
 
+#### Returning a rich error instead of raising one
+
+A raised `ToolError` flattens to a text-only result and **discards structured content** — exactly
+the machine-readable detail an agent needs to self-correct. Since FastMCP 3.4, `ToolResult` accepts
+`is_error` (mapping to `CallToolResult.isError`), so the tool can hand back a structured error the
+model can act on:
+
+```python
+@mcp.tool
+def lookup(id: str) -> ToolResult:
+    if not found(id):
+        return ToolResult(
+            content="User not found. Call search_users(query=...) to find candidates.",
+            structured_content={"code": 404, "id": id, "retryable": False},
+            is_error=True,
+        )
+    ...
+```
+
+This is the mechanism behind RECOVERY_GUIDE and ERROR_CLASSIFICATION: the recovery hint in
+`content`, the classification in `structured_content`. Proxies use it to forward upstream errors
+intact instead of collapsing them to text.
+
+Keep raising for genuine faults (a bug, an unreachable dependency); return `is_error=True` for
+expected failure modes the agent is supposed to handle.
+
 Refer to FastMCP docs on `ToolError` and error handling for implementation patterns.
 
 ### 9. Server composition
@@ -246,8 +286,8 @@ FastMCP supports composing multiple servers and sourcing components from various
 #### Mounting and importing
 
 - **Mounting** (`mcp.mount()`) — creates a live, dynamic link. Changes to the mounted server are immediately reflected in the parent. Use namespaces to avoid naming conflicts: `mcp.mount(weather_server, namespace="weather")` prefixes all tool names with `weather_`.
-- **Importing** (`import_server()`) — copies components once at import time. Use this when you want a static snapshot and don't need dynamic updates. Lower overhead than mounting.
-- **Choose mounting for development**, where sub-servers change frequently, and importing for production, where stability matters more.
+- **Importing** (`import_server()`) — copies components once at import time; a static snapshot, lower overhead than mounting. **Removed in FastMCP 4**, and `mount()` is not an equivalent: `import_server` skipped the child's lifespan and middleware, where `mount` runs both. A migration hazard, not a rename.
+- **Choose mounting for development**, where sub-servers change frequently, and importing for production, where stability matters more. On 4.x the choice is gone — mount.
 
 #### Provider system
 
@@ -270,51 +310,33 @@ Transforms modify components after provider aggregation:
 
 #### Progressive disclosure
 
-When a server has many tools (10+), exposing all of them at startup wastes context window and degrades agent tool-selection accuracy. FastMCP provides two approaches.
+**First, decide whether you need it at all.** Most MCP clients now defer tool loading themselves,
+fetching full schemas on demand, so the client already pays only for what it uses. Adding a
+server-side search transform on top of that is a second discovery layer: more round-trips, no
+context saved.
 
-**Preferred: Search transforms**
+Reach for server-side disclosure when one of these holds:
 
-Use `BM25SearchTransform` or `RegexSearchTransform` to replace `list_tools()` with a minimal interface. Pin the tools agents need immediately with `always_visible`; everything else is discoverable on demand.
+- **The catalog is genuinely large.** FastMCP's own framing is "hundreds or thousands of tools." A
+  gateway aggregating six backends into 200 qualifies; a server with 15 well-named tools does not.
+- **You can't control the client.** Public servers meet clients that still request the full listing;
+  `always_visible` guarantees a usable floor regardless.
+- **The catalog is dynamic** — generated from a database, tenant config, or OpenAPI spec, so its size
+  isn't known at build time.
+- **The cost is round-trips, not tokens.** That's Code Mode, a different win from a shorter list.
 
-```python
-from fastmcp.server.transforms.search import BM25SearchTransform
+Otherwise: name tools well, write good descriptions, expose them all. A curated 15-tool catalog
+beats a 40-tool one hidden behind search.
 
-# After mounting all sub-servers:
-mcp.add_transform(BM25SearchTransform(
-    max_results=8,
-    always_visible=["set_tenant", "search_plans", "run_plan", "wait_for_execution"],
-))
-# list_tools() now returns: always_visible tools + search_tools + call_tool
-```
+**Two server-side mechanisms, plus Code Mode.** Full implementation detail — search transforms
+(`BM25SearchTransform` / `RegexSearchTransform` and `always_visible`), the manual
+`Visibility` + gateway pattern and its `ToolListChangedNotification` caveat, and `CodeMode`
+sandboxed execution with its default limits — lives in `references/scaling-large-catalogs.md`.
 
-`search_tools(query=...)` returns ranked results with full parameter schemas. `call_tool(name=..., arguments={...})` invokes any discovered tool. Hidden tools remain **directly callable** — the transform controls discovery, not access.
-
-This approach is client-safe: `always_visible` tools are always in `list_tools` regardless of whether the client supports `ToolListChangedNotification`.
-
-**Alternative: Visibility + gateway (manual)**
-
-For cases where you need category-based opt-in rather than search:
-
-```python
-from fastmcp.server.transforms import Visibility
-
-@server.tool(tags={"gateway"})
-def get_capabilities() -> dict: ...          # always visible
-
-@server.tool(tags={"gateway"})
-async def enable_tools(category: str, ctx: Context) -> dict: ...  # always visible
-
-@server.tool(tags={"plans"})
-def search_plans(...) -> dict: ...           # hidden until activated
-
-# Hide all tools, then re-show gateway
-mcp.add_transform(Visibility(False, components={"tool"}))
-mcp.add_transform(Visibility(True, tags={"gateway"}, components={"tool"}))
-```
-
-**Caution:** `match_all=True` short-circuits the `components` filter — always use two separate transforms as shown, not a single `Visibility(False, match_all=True, components={"tool"})`.
-
-**Client compatibility note:** `ToolListChangedNotification` (sent after `enable_components()`) is optional and many clients don't implement it. If you can't guarantee client support, return activated tool schemas directly from `enable_tools()` so agents have immediate usability without waiting for a tool list refresh. This is the main reason to prefer the search transform approach — `always_visible` avoids this problem entirely.
+Short version: prefer a **search transform**, pinning the tools agents need immediately with
+`always_visible`. It's client-safe (no reliance on `ToolListChangedNotification`) and hidden tools
+stay directly callable — the transform controls discovery, not access. Reach for **Code Mode**
+instead when the cost is round-trips and intermediate payloads rather than catalog size.
 
 #### Design principles for composition
 
@@ -343,6 +365,18 @@ Security is enforced in code, never delegated to the agent via prompts. This is 
 - **Scope declaration** — declare required OAuth scopes per tool. Check before execution. Return clear errors that name the missing scope and how to obtain it. *(see: SCOPE_DECLARATION)*
 - **Audience-bound tokens** — for IdPs that don't natively support RFC 8707, set `forward_resource=True` on the OAuth provider (available on all FastMCP OAuth providers as of 3.2) to bind tokens to the MCP resource URL. Prevents cross-resource token reuse — a token issued for server A can't be replayed against server B.
 
+#### Transport and deployment hardening (3.4.x)
+
+- **Host/Origin guard is opt-in.** 3.4.3 added Host/Origin validation to Streamable HTTP against DNS
+  rebinding; it broke ASGI, serverless, and reverse-proxy deployments, so 3.4.4 relaxed the defaults.
+  Configure trusted hosts and origins deliberately — don't assume the default protects you.
+- **SSRF allow-lists must cover IPv6 transition addresses.** NAT64, 6to4, Teredo, and ISATAP can
+  smuggle private IPv4 targets past a naive filter. FastMCP blocks these; a hand-rolled one won't.
+- **Stay patched.** 3.4.1 floors Starlette at `>=1.0.1` (CVE-2026-48710, previously only constrained
+  transitively through `mcp`). 3.4.5 fixes `JWTVerifier` rejecting *every* token when a JWKS contains
+  one unsupported key — Ed25519, which Rauthy, Ory Hydra, and some Keycloak configs publish by
+  default.
+
 #### Audit and boundaries
 
 - **Audit trail** — log all tool invocations with: what (tool name + redacted parameters), who (user ID + session ID), when (timestamp), and result (success/failure + duration). This is critical for debugging and compliance. *(see: AUDIT_TRAIL)*
@@ -365,6 +399,22 @@ These are the most common mistakes when building MCP servers. Each one degrades 
 - **Security via prompts** — relying on system prompts or tool descriptions to enforce access control. Prompts can be overridden or ignored. Enforce security in code.
 - **Monolithic servers** — putting every tool in one server. Use composition to keep servers focused. An agent connecting to a 50-tool server has worse tool selection accuracy than one connecting to five 10-tool servers via mounting.
 - **Missing next-action hints** — returning results without guidance on what to do next. Every response is an opportunity to help the agent make progress.
-- **Using deprecated tool middlewares** — `PromptToolMiddleware` and `ResourceToolMiddleware` are deprecated as of FastMCP 3.2. Use the `ResourcesAsTools` / `PromptsAsTools` transforms instead.
+- **Using deprecated tool middlewares** — `PromptToolMiddleware` and `ResourceToolMiddleware` were deprecated in FastMCP 3.2 and are **removed in 4.0**. Use the `ResourcesAsTools` / `PromptsAsTools` transforms instead.
+- **Hiding tools the client would have deferred anyway** — most clients now load tool schemas on demand. Adding a server-side search layer on top of that buys extra round-trips, not context. Reserve progressive disclosure for genuinely large or dynamic catalogs (see §9).
+- **Raising when you meant to return** — a raised error flattens to text and drops structured content. For failure modes the agent is supposed to recover from, return `ToolResult(..., is_error=True)` (see §8).
 - **Calling `ctx.elicit()` without `response_type`** — deprecated as of FastMCP 3.2.4. Always pass an explicit `response_type`; use `response_title` and `response_description` for clearer prompts.
 - **No production discovery surface** — production servers should expose a registry/schema-explorer for runtime tool discovery, capability matching for client negotiation, and a health-check endpoint for monitoring. Easy to forget when iterating on tool design. *(see: TOOL_REGISTRY, SCHEMA_EXPLORER, CAPABILITY_MATCHING, HEALTH_CHECK)*
+
+### 12. FastMCP 4 (prerelease)
+
+FastMCP 4 rebuilds on MCP Python SDK v2 and targets the `2026-07-28` protocol, which is
+**sessionless**: every request stands alone, and one deployment serves both modern and
+handshake-era clients via per-connection negotiation.
+
+Most 3.x servers upgrade untouched. What FastMCP can't absorb is the protocol's own direction:
+**server-initiated sampling and roots are gone, and session state has no session to live on.**
+
+`references/fastmcp-4.md` has the removal table, replacements, what's new, and how to pin the
+prerelease under uv. Before writing 4.x code also fetch
+<https://gofastmcp.com/getting-started/upgrading/from-fastmcp-3> — it ships a copy-paste audit
+prompt listing every removed import and method.

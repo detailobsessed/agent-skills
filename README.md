@@ -21,8 +21,8 @@ npx skills -h
 For this repo, the most relevant commands are:
 
 ```bash path=null start=null
-skills add https://github.com/detailobsessed/agent-skills --skill macos-expert
 skills add https://github.com/detailobsessed/agent-skills --skill git-spice
+skills add https://github.com/detailobsessed/agent-skills --skill step-dev
 skills add https://github.com/detailobsessed/agent-skills --skill wise-mcp
 skills list
 skills find
@@ -66,17 +66,21 @@ If `pre-commit` gets replaced by a future explicit `prek install --hook-type pre
 
 ## Skills
 
-### `macos-expert`
-
-Source-backed macOS app development guidance covering Apple HIG expectations, SwiftUI, AppKit, accessibility, file/document workflows, and platform capabilities.
-
 ### `git-spice`
 
-Working effectively with [git-spice](https://abhinav.github.io/git-spice/) for stacked branches and GitHub/GitLab/Bitbucket Cloud pull/merge requests.
+Working effectively with [git-spice](https://abhinav.github.io/git-spice/) for stacked branches and pull/merge requests on GitHub, GitLab, Bitbucket, Gitea, Forgejo, and Codeberg.
+
+### `step-dev`
+
+Developing on the [Step](https://step.dev) unified automation platform — keyword development, the Keyword API, Automation Packages, and the CLI/CI-CD deployment path.
 
 ### `wise-mcp`
 
 Building MCP servers with [FastMCP](https://github.com/PrefectHQ/fastmcp), informed by battle-tested agentic tool design patterns by [Arcade](https://www.arcade.dev/patterns).
+
+### Retired
+
+- **`macos-expert`** — removed 2026-08-06. [Axiom](https://github.com/CharlesWiltgen/Axiom)'s `axiom-macos` skill now covers the same ground (windows, menus, sandboxing, AppKit interop and modernization, distribution) and tracks macOS 26/27, where this skill stopped at macOS 15. Use Axiom instead. Recoverable from git history if the Shape A/B architectural triage is ever worth extracting on its own.
 
 ## Adding a new skill
 
