@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **refresh-skill**: new skill for bringing a skill you maintain up to date with its tool's releases, its product's docs, or the premises under its own advice. It fixes wrong advice before adding anything, verifies each claim by running it, accounts for every finding in its report, and retires the skill when a maintained one covers the same ground.
+
 ## [2026.11.15] - 2026-11-15
 
 ### Changed

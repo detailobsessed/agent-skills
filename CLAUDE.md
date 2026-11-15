@@ -58,9 +58,11 @@ A release is a dated tag, `YEAR.MONTH.DAY` with no leading zeros (`2026.3.6`, no
 
 ## Updating a Skill
 
-To bring a skill up to date with a new upstream release, or to retire it, follow the project skill `.agents/skills/refresh-skill/SKILL.md`.
+To bring a skill up to date with a new upstream release, or to retire it, follow the published skill `refresh-skill/SKILL.md`, with this repo's specifics from `docs/maintaining-skills.md`: what each skill rests on, the validation commands, and past refreshes worth copying.
 
 Project skills that maintain this repo live in `.agents/skills/`; `.claude/skills` is a symlink to it, so Claude Code and Devin both load them. Give each one `metadata: {internal: "true"}`, quoted: the spec's `metadata` maps strings to strings, and the `skills` CLI accepts the string too. Without the flag, the `skills` CLI discovers `.agents/` and `.claude/` too, and `skills add` offers the skill to anyone installing from this repo. `skills add . --list` shows what is published. The validator checks these skills as well.
+
+A published skill this repo also uses on itself gets a symlink there instead of a copy: `.agents/skills/refresh-skill` points to `../../refresh-skill`, and carries no `internal` flag. `skills add . --list` lists it once.
 
 ## Adding a New Skill
 
