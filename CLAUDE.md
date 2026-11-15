@@ -38,6 +38,10 @@ This repo uses `prek` (Rust-based git hook framework). `prek install` installs o
 
 GitHub Actions runs on PR and push to main: syncs deps, then runs `prek` with `agentskills-validate typos markdownlint ruff-check ruff-format ty`. The `lychee` link checker is configured in `prek.toml` but not run in CI.
 
+## PRs or main
+
+Open a PR (via `git-spice branch submit`) for a change to the tooling (`prek.toml`, `pyproject.toml`, `uv.lock`, `.github/`, `scripts/`) or to the advice a skill gives. Devin Review checks those against `REVIEW.md`, and on PR #14 it caught a prek pin that passed every local check. Push everything else straight to `main` after the Tower review: typo fixes, README wording, a broken link. When unsure, open the PR.
+
 ## Updating a Skill
 
 To bring a skill up to date with a new upstream release, or to retire it, follow the project skill `.agents/skills/refresh-skill/SKILL.md`.
