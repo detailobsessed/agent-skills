@@ -1,3 +1,5 @@
+# Run against a checkout of 290c2ea, the last commit before any refresh: once the wise-mcp skill
+# is refreshed, HEAD no longer has the FastMCP 3.4.5 baseline this case starts from.
 schema_version: "1.1"
 name: refresh-wise-mcp
 expected_outcome: |
