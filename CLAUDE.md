@@ -15,11 +15,12 @@ uv sync --locked --group dev
 # Validate all skills against the Agent Skills spec
 uv run python scripts/validate_skills.py
 
-# Run all pre-push checks (validation + typos + markdown lint + python lint/type)
-prek run --all-files agentskills-validate typos markdownlint ruff-check ruff-format ty
+# Run all pre-push checks (validation + typos + markdown lint + python lint/type).
+# --hook-stage pre-push is required: these hooks are pre-push only, and without it prek runs nothing and exits 0.
+prek run --all-files --hook-stage pre-push agentskills-validate typos markdownlint ruff-check ruff-format ty
 
-# Run full pre-push suite including link checking
-prek run --all-files
+# Run the full suite: pre-commit builtins, then every pre-push hook including lychee link checking
+prek run --all-files && prek run --all-files --hook-stage pre-push
 
 # Scaffold a new skill
 skills init <name>
@@ -42,5 +43,5 @@ GitHub Actions runs on PR and push to main: syncs deps, then runs `prek` with `a
 1. `skills init <name>` — creates `<name>/SKILL.md` with starter frontmatter
 2. Replace the generated `SKILL.md` with real content
 3. Add any `references/` or supporting files
-4. Run `uv run python scripts/validate_skills.py` and `prek run --all-files`
+4. Run `uv run python scripts/validate_skills.py` and the full suite above
 5. Commit in small, reviewable steps

@@ -101,6 +101,9 @@ The preferred workflow here is:
     ```bash path=null start=null
     uv run python scripts/validate_skills.py
     prek run --all-files
+    prek run --all-files --hook-stage pre-push
     ```
+
+    The second run is the one that matters: typos, markdownlint, ruff, ty, the validator and lychee are pre-push hooks, and `prek run` without `--hook-stage pre-push` skips them silently.
 
 5. Commit the change in small, reviewable steps
