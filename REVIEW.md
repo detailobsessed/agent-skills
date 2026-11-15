@@ -8,7 +8,7 @@ This repo is a collection of agent skills: Markdown instructions that agents fol
 
 - **One tool version, pinned in several places.** prek appears in `prek.toml` (`minimum_prek_version`), in `pyproject.toml` (the `dev` group), in `uv.lock`, and in the pinned `prek-action` in `.github/workflows/ci.yml`. A change to one must agree with the others: a raised minimum with a stale pin breaks `uv run prek` while CI and a Homebrew prek still pass.
 - **prek commands must select the stage.** The lint, type, validation and link hooks are declared `stages = ["pre-push"]`. A `prek run … <hook ids>` without `--hook-stage pre-push`, in CI, docs or a skill, runs none of them, prints nothing and exits 0. Flag any such command.
-- **Project skills stay unpublished.** Skills under `.agents/skills/` maintain this repo. Each needs `metadata: {internal: true}` in its frontmatter, or `skills add` offers it to anyone installing from the repo. The `skills` CLI scans `.agents/` and `.claude/`, so the location alone does not hide it.
+- **Project skills stay unpublished.** Skills under `.agents/skills/` maintain this repo. Each needs `metadata: {internal: "true"}` in its frontmatter, quoted (the spec's `metadata` values are strings), or `skills add` offers it to anyone installing from the repo. The `skills` CLI scans `.agents/` and `.claude/`, so the location alone does not hide it.
 
 ## Skill content
 

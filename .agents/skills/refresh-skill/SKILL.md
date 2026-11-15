@@ -2,14 +2,14 @@
 name: refresh-skill
 description: Bring a skill in this repo up to date with what it was built from — a tool's releases, a product's docs, or our own design judgments and the ecosystem they rest on. Finds what changed since the skill was last checked, fixes the advice that is now wrong, adds what is new, or retires the skill when something better covers it. Use when the user asks to update, refresh, review or audit a skill here, when a skill's upstream has released or its docs moved, when a skill has not been looked at in months, or when an agent following one of these skills hit an error the skill did not predict.
 metadata:
-  internal: true
+  internal: "true"
 ---
 
 # Refresh a skill
 
 The skills in this repo each describe something that keeps moving. A stale skill does not just miss features — it tells the agent to do things that no longer work, or no longer make sense, and the agent follows it with confidence. A refresh exists to find and fix that advice first. New material comes second.
 
-This skill is how this repo is maintained, not a skill to publish. It lives in `.agents/skills/` (Claude Code reads it through the `.claude/skills` symlink, Devin directly), and `metadata.internal: true` keeps `skills add` from offering it. The `skills` CLI scans `.claude/` and `.agents/` too, so the flag is what keeps it out, not the location. Check with `skills add . --list`.
+This skill is how this repo is maintained, not a skill to publish. It lives in `.agents/skills/` (Claude Code reads it through the `.claude/skills` symlink, Devin directly), and `metadata.internal: "true"` keeps `skills add` from offering it. The `skills` CLI scans `.claude/` and `.agents/` too, so the flag is what keeps it out, not the location. Check with `skills add . --list`.
 
 ## 1. Find what the skill was built from
 

@@ -46,7 +46,7 @@ Open a PR (via `git-spice branch submit`) for a change to the tooling (`prek.tom
 
 To bring a skill up to date with a new upstream release, or to retire it, follow the project skill `.agents/skills/refresh-skill/SKILL.md`.
 
-Project skills that maintain this repo live in `.agents/skills/`; `.claude/skills` is a symlink to it, so Claude Code and Devin both load them. Give each one `metadata: {internal: true}`: the `skills` CLI discovers `.agents/` and `.claude/` too, and without the flag `skills add` offers the skill to anyone installing from this repo. `skills add . --list` shows what is published. The validator checks these skills as well.
+Project skills that maintain this repo live in `.agents/skills/`; `.claude/skills` is a symlink to it, so Claude Code and Devin both load them. Give each one `metadata: {internal: "true"}`, quoted: the spec's `metadata` maps strings to strings, and the `skills` CLI accepts the string too. Without the flag, the `skills` CLI discovers `.agents/` and `.claude/` too, and `skills add` offers the skill to anyone installing from this repo. `skills add . --list` shows what is published. The validator checks these skills as well.
 
 ## Adding a New Skill
 

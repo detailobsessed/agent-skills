@@ -1,6 +1,6 @@
 ---
 name: step-dev
-description: Developer guide for the Step unified automation platform. Covers keyword development (Java, .NET, JS/TS), the Keyword API, Automation Packages, the YAML descriptor, Step CLI, Maven plugin, CI/CD integration, and local/remote execution. Use when building, debugging, deploying, or reviewing Step automation code — keywords, plans, packages, or anything involving step.dev, automation-package.yaml, the Step CLI, or the Keyword API. Also use when the user mentions load testing, synthetic monitoring, or RPA in the context of Step.
+description: Developer guide for the Step unified automation platform. Explains how to write keywords in Java, .NET or JavaScript against the Keyword API and package them with their plans as an Automation Package described in YAML. Then how to run and deploy that package with the Step CLI or the Maven plugin — locally, on a Step server or from CI/CD. Use when writing, debugging, deploying or reviewing Step keywords, plans or Automation Packages, and whenever a task names step.dev, an automation-package.yaml or the Step CLI. Also use for load testing, synthetic monitoring or RPA built on Step.
 ---
 
 # Step Developer Guide
