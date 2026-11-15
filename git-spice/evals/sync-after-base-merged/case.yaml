@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: sync-after-base-merged
+expected_outcome: |
+  commands.md syncs with git-spice repo sync, rebases feat-b onto the new main before anything is pushed (a --restack on the sync, or a stack or upstack restack), and then updates feat-b's existing PR, every command runnable without a prompt.

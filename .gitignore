@@ -1,4 +1,5 @@
 .venv/
+__pycache__/
 # Local Claude Code state stays out; project skills that maintain this repo are tracked.
 .claude/*
 !.claude/skills

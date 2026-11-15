@@ -43,14 +43,14 @@ Validation tooling is configured at the repository root:
 
 - `pyproject.toml` provides the shared Python tooling definition
 - `prek.toml` runs formatting and quality checks across all skills in the repo
-- official Agent Skills spec validation runs via `scripts/validate_skills.py`, which discovers top-level skill directories and invokes `uv run agentskills validate <skill-dir>` for each one
+- Agent Skills spec validation runs through [skill-validator](https://github.com/agent-ecosystem/skill-validator), and `scripts/validate_skills.py` adds the best-practices rules it does not check yet
 
 This is intentional: spell-checking, dead-link checking, TOML validation, and related checks should apply consistently to every skill instead of being duplicated inside each skill directory.
 
-Run the official skill validation for all current skills from the repo root with:
+Run the skill validation for all current skills from the repo root with:
 
 ```bash path=null start=null
-uv run python scripts/validate_skills.py
+prek run --all-files --hook-stage pre-push skill-validator skill-validator-project skill-best-practices
 ```
 
 If GitButler is managing `pre-commit`, prefer leaving that hook in place and using `prek` primarily for `pre-push`. This repo is configured so a plain `prek install` installs only `pre-push` by default, which avoids overwriting a custom or GitButler-managed `pre-commit` hook.
@@ -66,17 +66,31 @@ If `pre-commit` gets replaced by a future explicit `prek install --hook-type pre
 
 ## Skills
 
+Each skill directory holds only what an agent reads: `skills add` copies the whole directory into every install. Notes for people browsing the repo live here instead. All skills are MIT-licensed ([LICENSE](LICENSE)).
+
 ### `git-spice`
 
-Working effectively with [git-spice](https://abhinav.github.io/git-spice/) for stacked branches and pull/merge requests on GitHub, GitLab, Bitbucket, Gitea, Forgejo, and Codeberg.
+Driving [git-spice](https://abhinav.github.io/git-spice/), the stacked-branch CLI, from an agent: the traps its built-in help does not warn about (prompts, experiment gates, staging, restacks that don't happen, GitHub native stacks), with `git-spice -h` left as the command reference.
+
+```bash
+npx skills add https://github.com/detailobsessed/agent-skills --skill git-spice
+```
 
 ### `step-dev`
 
 Developing on the [Step](https://step.dev) unified automation platform — keyword development, the Keyword API, Automation Packages, and the CLI/CI-CD deployment path.
 
+```bash
+npx skills add https://github.com/detailobsessed/agent-skills --skill step-dev
+```
+
 ### `wise-mcp`
 
-Design judgment for MCP servers built with [FastMCP](https://github.com/PrefectHQ/fastmcp), drawn from the MCP spec, client docs, measured studies and practitioner catalogs listed in [its README](wise-mcp/README.md#sources). Pairs with FastMCP's own `fastmcp-server` skill for the API.
+Design judgment for MCP servers built with [FastMCP](https://github.com/PrefectHQ/fastmcp): what makes tools, outputs, errors, state and auth work for the agent calling them. Drawn from the MCP spec, client docs, measured studies and practitioner catalogs, each listed with the date it was last checked in [`references/sources.md`](wise-mcp/references/sources.md). Pairs with FastMCP's own `fastmcp-server` skill for the API.
+
+```bash
+npx skills add https://github.com/detailobsessed/agent-skills --skill wise-mcp
+```
 
 ### Retired
 
@@ -103,11 +117,10 @@ The preferred workflow here is:
 4. Run repository validation from the root:
 
     ```bash path=null start=null
-    uv run python scripts/validate_skills.py
     prek run --all-files
     prek run --all-files --hook-stage pre-push
     ```
 
-    The second run is the one that matters: typos, markdownlint, ruff, ty, the validator and lychee are pre-push hooks, and `prek run` without `--hook-stage pre-push` skips them silently.
+    The second run is the one that matters: typos, markdownlint, ruff, ty, the validators and lychee are pre-push hooks, and `prek run` without `--hook-stage pre-push` skips them silently.
 
 5. Commit the change in small, reviewable steps

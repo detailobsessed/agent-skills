@@ -1,6 +1,7 @@
 ---
 name: wise-mcp
-description: Design judgment for MCP servers built with FastMCP — what makes tools, outputs, errors, state, auth and large catalogs work for the agent calling them, drawn from Arcade's agentic tool patterns and the current MCP spec. Use when building, wrapping, reviewing or refactoring an MCP server, tool, resource or prompt, when deciding tool boundaries, descriptions, response shape or error design, when a server needs cross-call state, user confirmation or per-tool auth, or when a tool catalog is getting large. Pairs with FastMCP's own `fastmcp-server` skill, which covers the API.
+description: Design judgment for MCP servers built with FastMCP — what makes tools, outputs, errors, state, auth and large catalogs work for the agent calling them, drawn from the current MCP spec, client docs, measured studies and Arcade's pattern catalog. Use when building, wrapping, reviewing or refactoring an MCP server, tool, resource or prompt, when deciding tool boundaries, descriptions, response shape or error design, when a server needs cross-call state, user confirmation or per-tool auth, or when a tool catalog is getting large. Pairs with FastMCP's own `fastmcp-server` skill, which covers the API.
+license: MIT
 ---
 
 # Designing MCP servers that agents use well
@@ -8,13 +9,11 @@ description: Design judgment for MCP servers built with FastMCP — what makes t
 This skill is the design half of building an MCP server: what to build and why. It deliberately leaves the API to FastMCP's own sources, which track every release:
 
 - **FastMCP API** — the `fastmcp-server` skill from gofastmcp.com, if installed. Otherwise read the index at <https://gofastmcp.com/llms.txt> and fetch the pages you need as `.md`; don't load `llms-full.txt`, which runs to megabytes. Check the project's installed FastMCP version first: unversioned pages describe the current line, `/v3/` pages the 3.x line.
-- **Arcade's pattern catalog** — 54 patterns for agent-facing tools at <https://www.arcade.dev/patterns>, plain text at <https://www.arcade.dev/patterns/llm.txt>. The `(see: NAME)` tags below are its pattern names. It is a practitioner's catalog, not a measured one. Anthropic's [Writing effective tools for agents](https://www.anthropic.com/engineering/writing-tools-for-agents) independently supports its core (consolidated tools, natural identifiers, concise responses, actionable errors), and where measurements disagree, this skill follows the measurements.
+- **Arcade's pattern catalog** — 54 patterns for agent-facing tools at <https://www.arcade.dev/patterns>, plain text at <https://www.arcade.dev/patterns/llm.txt>. The `(see: NAME)` tags below are its pattern names. It is a practitioner's catalog, not a measured one: where measurements disagree with it, this skill follows the measurements.
 
-Written against FastMCP 4.2.0 and MCP spec 2026-07-28, the latest at the time of writing (2026-11-15). Where an API named here disagrees with the installed version, the installed version wins; the judgment usually still holds.
+Written against FastMCP 4.2.0 and MCP spec 2026-07-28, the latest at the time of writing (2026-11-15). Where an API named here disagrees with the installed version, the installed version wins; the judgment usually still holds. Every source the advice rests on, with the date it was last checked, is in [references/sources.md](references/sources.md).
 
 ## 1. Guiding principles
-
-These apply to every decision below.
 
 - **Machine experience** — design for LLM comprehension, not human reading. Names, descriptions, parameters and errors are the agent's only interface; a terse description a developer would understand leaves an agent guessing about purpose, prerequisites and valid inputs. *(see: TOOL_DESCRIPTION, MACHINE_EXPERIENCE)*
 - **Tool DAGs** — hint at what comes next. Every tool should answer "what do I call before this?" and "what might I call after?", so the agent builds workflows without trial and error. *(see: DEPENDENCY_HINT, NEXT_ACTION_HINT)*
@@ -22,8 +21,6 @@ These apply to every decision below.
 - **Security boundaries** — prompts express intent, code enforces rules. Authorization, validation and audit happen in the tool layer, never in a system prompt or a tool description. *(see: SECRET_INJECTION, PERMISSION_GATE)*
 
 ## 2. Tool design
-
-Tools are how agents act on your server. Get these right and orchestration stays simple; get them wrong and no prompt engineering compensates.
 
 ### Classify each tool
 
@@ -84,13 +81,7 @@ Treat the advice in this skill as defaults to test, not rules to apply wholesale
 
 ## 3. Execution model
 
-How a tool runs is part of its contract. Agents reason about latency, retries and cancellation like any API caller, so be explicit.
-
-- **Sync vs. async** — FastMCP runs sync tools in a thread pool. A tool bound to one thread (UI frameworks, some database drivers) must opt out. *(see: SYNCHRONOUS_EXECUTION)*
-- **Long work goes in a background task** — the call returns a handle the agent polls instead of blocking until a client timeout kills it. In the current spec, tasks are a protocol extension, so the server has to register it; check the tasks docs page before marking a tool as a task. *(see: ASYNC_JOB)*
-- **Transactional boundaries** — when a tool makes several writes, say whether they are atomic and what state partial failure leaves. If not atomic, report partial success in the response. *(see: TRANSACTIONAL_BOUNDARY)*
-- **Compensation** — for a non-atomic multi-step tool, offer an undo tool where feasible; an agent can recover from a partial failure only if it has a reverse operation. *(see: COMPENSATION_HANDLER)*
-- **Timeouts** — set explicit per-tool timeouts, and report progress on anything that takes more than a few seconds so clients don't treat silence as a hang. *(see: TIMEOUT_BOUNDARY)*
+How a tool runs is part of its contract: say how long it takes, whether a retry is safe and what a partial failure leaves behind. Read `references/execution-model.md` when a tool is bound to one thread, runs longer than a client timeout, makes several writes, or needs an undo.
 
 ## 4. State across calls
 
@@ -112,24 +103,11 @@ Explicit parameters beat hidden context whenever the agent could get it wrong. U
 
 ## 6. Resources, prompts and apps
 
-**Resources vs. tools.** Use a resource for stable, read-only data identified by a URI: the agent reads it when it needs context. Use a tool when the operation takes more than a URI path, has side effects, computes something, or depends on who asks. Use a resource template for a parameterized family (`data://users/{user_id}/profile`) instead of one resource per entity. Keep URI schemes hierarchical and consistent across the server.
+- **Resources** hold stable, read-only data behind a URI. Anything with side effects, computation or a caller-dependent answer is a tool. Agents find resources only when a tool description names them. *(see: RESOURCE_REFERENCE)*
+- **Prompts** earn their place only for a workflow or format users trigger by name. Guidance that fits in a tool description goes there.
+- **Apps** fit when the human has to see, approve, pick, upload or enter something. Use FastMCP's built-in providers, not hand-rolled ones.
 
-Resources are found only if the agent knows they exist, so name them in tool descriptions: "For full project configuration, read `config://project/{project_id}`." *(see: RESOURCE_REFERENCE)*
-
-**Prompts** are reusable message templates, the least-used primitive. They earn their place for a standardized workflow (a review checklist), a fixed report format, instructions too long for a tool description, or a behaviour users trigger by name. Keep each to one purpose. If the guidance fits in a tool description, put it there. A repeatable multi-tool workflow may be better shipped as an agent skill alongside the server; the `fastmcp-server` skill covers serving one.
-
-**Apps** render an interactive UI in the conversation. Decide by what the human needs to do:
-
-| The human needs to… | Use |
-| --- | --- |
-| see data the agent already gathered | a tool that returns a UI (one-shot, no round-trip) |
-| submit forms or trigger backend work from the UI | an app with backend tools the UI calls, hidden from the model |
-| upload a file | FastMCP's file-upload provider, never a parameter the agent pastes content into |
-| approve an irreversible action | the approval provider |
-| pick among candidates | the choice provider (pairs with CONFIRMATION_REQUEST) |
-| enter structured data | the form provider, which validates against a Pydantic model |
-
-Prefer the built-in providers over hand-rolled equivalents. Pin the UI component library (`prefab-ui`) explicitly, because it releases faster than FastMCP and its import paths move.
+Read `references/resources-prompts-apps.md` before adding a resource, prompt or app: it has the URI-template rules, when a prompt beats a skill, and which provider fits which interaction.
 
 ## 7. Tool output
 
@@ -194,13 +172,7 @@ Raise for bugs and unreachable dependencies. Proxies use the same mechanism to f
 
 Compose servers to keep each one focused. Mount child servers under a namespace so their names can't collide. Generate tools from an OpenAPI spec only to bootstrap: curate the endpoints that matter, exclude the rest, and rewrite their descriptions (§2). A curated tool almost always beats a generated one.
 
-### Design principles
-
-- **Abstraction ladder** — offer low-level (`write_bytes`), mid-level (`create_document`) and high-level (`draft_report`) tools, and let the agent pick its level. *(see: ABSTRACTION_LADDER)*
-- **Task bundles** — when operations always happen together, combine them into one tool named after the task: `onboard_user()`, not `create_user_and_assign_role_and_send_email()`. *(see: TASK_BUNDLE)*
-- **Gateway** — one parent server as the interface to several backends, routing internally. *(see: TOOL_GATEWAY)*
-- **Canonical tool model** — wrapping similar APIs (several ticket systems), define one internal model and convert at the boundary, with per-backend adapters behind it, so a new backend adds no agent-facing tools. *(see: CANONICAL_TOOL_MODEL, TOOL_ADAPTER)*
-- **Tool versioning** — when a signature must change, expose the new tool alongside the old, route clients with a version filter, and put the deprecation timeline in the old tool's description. *(see: TOOL_VERSIONING)*
+When a server wraps several backends, offers one capability at several levels, or has to change a tool's signature, read `references/composition.md`: abstraction ladders, task bundles, gateways, one canonical model over similar APIs, and versioning a tool without breaking callers.
 
 ### When to hide tools behind search
 

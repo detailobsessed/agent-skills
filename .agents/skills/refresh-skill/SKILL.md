@@ -2,14 +2,14 @@
 name: refresh-skill
 description: Bring a skill in this repo up to date with what it was built from — a tool's releases, a product's docs, or our own design judgments and the ecosystem they rest on. Finds what changed since the skill was last checked, fixes the advice that is now wrong, adds what is new, or retires the skill when something better covers it. Use when the user asks to update, refresh, review or audit a skill here, when a skill's upstream has released or its docs moved, when a skill has not been looked at in months, or when an agent following one of these skills hit an error the skill did not predict.
 metadata:
-  internal: true
+  internal: "true"
 ---
 
 # Refresh a skill
 
 The skills in this repo each describe something that keeps moving. A stale skill does not just miss features — it tells the agent to do things that no longer work, or no longer make sense, and the agent follows it with confidence. A refresh exists to find and fix that advice first. New material comes second.
 
-This skill is how this repo is maintained, not a skill to publish. It lives in `.agents/skills/` (Claude Code reads it through the `.claude/skills` symlink, Devin directly), and `metadata.internal: true` keeps `skills add` from offering it. The `skills` CLI scans `.claude/` and `.agents/` too, so the flag is what keeps it out, not the location. Check with `skills add . --list`.
+This skill is how this repo is maintained, not a skill to publish. It lives in `.agents/skills/` (Claude Code reads it through the `.claude/skills` symlink, Devin directly), and `metadata.internal: "true"` keeps `skills add` from offering it. The `skills` CLI scans `.claude/` and `.agents/` too, so the flag is what keeps it out, not the location. Check with `skills add . --list`.
 
 ## 1. Find what the skill was built from
 
@@ -25,9 +25,9 @@ What each skill currently rests on:
 
 | Skill | Release stream | Docs | Our judgments |
 | --- | --- | --- | --- |
-| `git-spice` | `abhinav/git-spice`; baseline `> This skill is written against **git-spice vX**` in `SKILL.md`, `Written against` in `README.md` | `git-spice -h` and <https://abhinav.github.io/git-spice/> | staging rules, the daily workflow |
+| `git-spice` | `abhinav/git-spice`; "Written against git-spice vX, the latest at the time of writing (date)" in `SKILL.md`. Holds only the traps the built-in help does not warn about: `git-spice -h` is the command reference | `git-spice -h` and <https://abhinav.github.io/git-spice/> (source under `doc/src/` at each tag) | **the whole skill**: every trap, each re-run against the new release in a scratch repo |
 | `step-dev` | `exense/step` (tags `3.N.x` = docs `vN`, confirmed for 29–31); the Java Keyword API releases separately (`exense/step-api`) | **primary**: the `step.dev/knowledgebase` pages cited in `references/*.md`; "based on the vN documentation … last read on" in `SKILL.md`. No public docs source; `https://step.dev/knowledgebase/<N>/...` serves version N, for diffing against the last-read version | stateful vs stateless keyword guidance, the common-mistakes list |
-| `wise-mcp` | `PrefectHQ/fastmcp`; "Written against FastMCP X and MCP spec Y, the latest at the time of writing (date)" in `SKILL.md`, "Written against" in `README.md`. Names only the APIs its judgments rest on: the API itself is upstream's `fastmcp-server` skill | <https://gofastmcp.com> (unversioned pages are the current line); Arcade's catalog at <https://www.arcade.dev/patterns>, its count in `README.md`'s badge and `SKILL.md` | **the whole skill**. Its premises are the **Sources** table in `README.md`: spec, client docs, measured studies, Arcade's catalog, each with a checked date. Re-read every row, then search for newer work (vendor engineering posts, benchmarked studies, the spec's newest revision) and add a row for anything that holds up, or a "searched and not adopted" note. Measurements outrank a practitioner's catalog |
+| `wise-mcp` | `PrefectHQ/fastmcp`; "Written against FastMCP X and MCP spec Y, the latest at the time of writing (date)" in `SKILL.md`. Names only the APIs its judgments rest on: the API itself is upstream's `fastmcp-server` skill | <https://gofastmcp.com> (unversioned pages are the current line); Arcade's catalog at <https://www.arcade.dev/patterns>, its count in `SKILL.md` and `references/sources.md` | **the whole skill**. Its premises are the table in `references/sources.md`: spec, client docs, measured studies, Arcade's catalog, each with a checked date. Re-read every row, then search for newer work (vendor engineering posts, benchmarked studies, the spec's newest revision) and add a row for anything that holds up, or a "searched and not adopted" note. Measurements outrank a practitioner's catalog |
 
 Read the skill's `git log` too: the last refresh commit says what was checked then and why, and is where this refresh picks up.
 
@@ -106,16 +106,15 @@ Fix bucket 1 first, then bucket 2, then add bucket 3.
 
 - Correct wrong advice where it stands; do not append a "changes in vX" section that leaves the old text in place for an agent to follow.
 - Describe the latest release only (step 2a): remove any version notes and "new in vX" markers you find, rather than adding more.
-- Move every marker from step 1 to what you checked, in `SKILL.md` and the skill's `README.md`.
-- Stay inside the validator's budget: `SKILL.md` body ≤ 500 lines and ~5000 words. When a section grows, move the detail into `references/<topic>.md` and leave a one-line pointer, as `wise-mcp/references/scaling-large-catalogs.md` does.
+- Move every marker from step 1 to what you checked. Markers live in the skill's own files (`SKILL.md`, `references/`): a skill directory holds no README, since `skills add` copies everything in it into the install.
+- Stay inside skill-validator's budget: `SKILL.md` body ≤ 500 lines and 5,000 tokens. When a section grows, move the detail into `references/<topic>.md` and leave a one-line pointer, as `wise-mcp/references/scaling-large-catalogs.md` does.
 - Keep the frontmatter `description` third-person with a "Use when" trigger; if the refresh changed what the skill covers, update it.
 - Update the root `README.md` skill list if the skill's one-line summary changed.
 
 ## 6. Validate
 
 ```bash
-uv run python scripts/validate_skills.py
-prek run --all-files --hook-stage pre-push agentskills-validate typos markdownlint ruff-check ruff-format ty
+prek run --all-files --hook-stage pre-push skill-validator skill-validator-project skill-best-practices typos markdownlint ruff-check ruff-format ty
 prek run --all-files --hook-stage pre-push lychee   # links; not run in CI, so run it here
 ```
 
