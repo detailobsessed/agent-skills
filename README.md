@@ -70,7 +70,7 @@ Each skill directory holds only what an agent reads: `skills add` copies the who
 
 ### `git-spice`
 
-Working effectively with [git-spice](https://abhinav.github.io/git-spice/) for stacked branches and pull/merge requests on GitHub, GitLab, Bitbucket, Gitea, Forgejo, and Codeberg: setup, staging rules, the daily workflow, submitting, amending, merging and syncing a stack.
+Driving [git-spice](https://abhinav.github.io/git-spice/), the stacked-branch CLI, from an agent: the traps its built-in help does not warn about (prompts, experiment gates, staging, restacks that don't happen, GitHub native stacks), with `git-spice -h` left as the command reference.
 
 ```bash
 npx skills add https://github.com/detailobsessed/agent-skills --skill git-spice

@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: merge-github-stack
+expected_outcome: |
+  commands.md enables the merge experiment (git config spice.experiment.merge true) before a git-spice stack or downstack merge, and the answer explains that GitHub merges a submitted linear stack natively, with the limits that can stop it (auto-merge or queued PRs, head branches in a fork).

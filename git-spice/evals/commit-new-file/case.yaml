@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: commit-new-file
+expected_outcome: |
+  The new commit on feat-parser contains both parser.py and the README.md change, made with a git-spice commit command, and no command failed or waited on a prompt along the way.
+context:
+  scaffold_script: setup-repo.sh
