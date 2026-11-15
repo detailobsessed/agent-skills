@@ -50,7 +50,7 @@ hooks = [
 repo = "local"
 hooks = [
   {
-    # The best-practices rules skill-validator lacks. Delete once agent-ecosystem/skill-validator#108 ships.
+    # The best-practices rules skill-validator lacks. The docstring of the script says when to retire each.
     id = "skill-best-practices",
     name = "Best-practices checks skill-validator lacks",
     language = "system",

@@ -1,16 +1,18 @@
 """Check every skill in this repo against the best-practices rules skill-validator lacks.
 
 skill-validator (the `skill-validator` prek hooks) checks the Agent Skills spec: frontmatter,
-names, lengths, token budgets, links and directories. This script keeps only the four rules from
-Anthropic's skill authoring best practices that it does not check yet:
+names, lengths, token budgets, links and directories. This script keeps only the rules from
+Anthropic's skill authoring best practices that skill-validator v1.8.0 does not check:
 
 - the description is written in the third person
 - the description says when to use the skill
 - a reference file over 100 lines opens with a table of contents
 - SKILL.md has no time-sensitive wording that will go stale
+- the name contains no reserved word ("anthropic", "claude")
+- SKILL.md has no Windows-style backslash paths
 
-Delete this script, its prek hook and its CI entry once agent-ecosystem/skill-validator#108
-ships these checks.
+agent-ecosystem/skill-validator#108 asks for the first four. Drop each check once a pinned
+skill-validator release reports it, and this script, its prek hook and its CI entry with the last.
 
 Sources:
     https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
@@ -36,6 +38,8 @@ TRIGGER_PHRASE_RE = re.compile(
     r"\b(use\s+when|use\s+this\s+(skill\s+)?when|invoke\s+when|when\s+the\s+user)\b",
     re.IGNORECASE,
 )
+RESERVED_NAME_WORDS = frozenset({"anthropic", "claude"})
+WINDOWS_PATH_RE = re.compile(r"[A-Za-z0-9_.-]+\\[A-Za-z0-9_.-]+\.[A-Za-z0-9]+")
 TIME_SENSITIVE_RE = re.compile(
     r"\b(before|after|by|until|since|as of)\s+"
     r"(January|February|March|April|May|June|July|August|"
@@ -119,6 +123,40 @@ def check_time_sensitive(skill_dir: Path) -> list[Finding]:
     ]
 
 
+def check_reserved_name(skill_dir: Path) -> list[Finding]:
+    """skill-validator checks the name's syntax, length and directory, not its words."""
+    if not (reserved := sorted(RESERVED_NAME_WORDS & set(skill_dir.name.split("-")))):
+        return []
+    return [
+        Finding(
+            "reserved-name-word",
+            f"the name contains {', '.join(reserved)}, reserved by Anthropic.",
+            f"{skill_dir.name}/SKILL.md",
+        )
+    ]
+
+
+def check_windows_paths(skill_dir: Path) -> list[Finding]:
+    text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
+    return [
+        Finding(
+            "windows-path",
+            f"'{match.group(0)}' uses backslashes; write paths with forward slashes.",
+            f"{skill_dir.name}/SKILL.md:{text.count('\n', 0, match.start()) + 1}",
+        )
+        for match in WINDOWS_PATH_RE.finditer(text)
+    ]
+
+
+CHECKS = (
+    check_description,
+    check_reference_tocs,
+    check_time_sensitive,
+    check_reserved_name,
+    check_windows_paths,
+)
+
+
 def is_skill(path: Path) -> bool:
     return path.is_dir() and not path.name.startswith(".") and (path / "SKILL.md").is_file()
 
@@ -136,7 +174,7 @@ def main() -> int:
     findings = [
         finding
         for skill_dir in skill_directories()
-        for check in (check_description, check_reference_tocs, check_time_sensitive)
+        for check in CHECKS
         for finding in check(skill_dir)
     ]
     for f in findings:

@@ -32,7 +32,7 @@ skills init <name>
 
 Any top-level directory (not starting with `.`) that contains a `SKILL.md` file is a skill, and so is each directory under `.agents/skills/`. Each `SKILL.md` must have YAML frontmatter with `name` and `description` fields.
 
-[skill-validator](https://github.com/agent-ecosystem/skill-validator) checks them against the spec, including the 5,000-token body budget, and exits non-zero on a warning as well as an error. `check .` skips dot-directories, so `.agents/skills` gets a run of its own. `scripts/validate_skills.py` holds only the four best-practices rules skill-validator lacks (third-person description, a "Use when" trigger, a contents heading in a reference over 100 lines, no time-sensitive wording). Delete it and its `skill-best-practices` hook once agent-ecosystem/skill-validator#108 ships them.
+[skill-validator](https://github.com/agent-ecosystem/skill-validator) checks them against the spec, including the 5,000-token body budget, and exits non-zero on a warning as well as an error. `check .` skips dot-directories, so `.agents/skills` gets a run of its own. `scripts/validate_skills.py` holds only the best-practices rules skill-validator lacks: third-person description, a "Use when" trigger, a contents heading in a reference over 100 lines, no time-sensitive wording, no reserved word in the name, no Windows-style paths. agent-ecosystem/skill-validator#108 asks for the first four. Drop each check once a pinned release reports it, and the script with its `skill-best-practices` hook along with the last.
 
 ## Hook Setup
 
