@@ -76,7 +76,7 @@ Developing on the [Step](https://step.dev) unified automation platform — keywo
 
 ### `wise-mcp`
 
-Building MCP servers with [FastMCP](https://github.com/PrefectHQ/fastmcp), informed by battle-tested agentic tool design patterns by [Arcade](https://www.arcade.dev/patterns).
+Design judgment for MCP servers built with [FastMCP](https://github.com/PrefectHQ/fastmcp), drawn from the MCP spec, client docs, measured studies and practitioner catalogs listed in [its README](wise-mcp/README.md#sources). Pairs with FastMCP's own `fastmcp-server` skill for the API.
 
 ### Retired
 

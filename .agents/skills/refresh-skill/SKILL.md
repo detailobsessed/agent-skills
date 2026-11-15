@@ -27,7 +27,7 @@ What each skill currently rests on:
 | --- | --- | --- | --- |
 | `git-spice` | `abhinav/git-spice`; baseline `> This skill is written against **git-spice vX**` in `SKILL.md`, `Written against` in `README.md` | `git-spice -h` and <https://abhinav.github.io/git-spice/> | staging rules, the daily workflow |
 | `step-dev` | `exense/step` (tags `3.N.x` = docs `vN`, confirmed for 29–31); the Java Keyword API releases separately (`exense/step-api`) | **primary**: the `step.dev/knowledgebase` pages cited in `references/*.md`; "based on the vN documentation … last read on" in `SKILL.md`. No public docs source; `https://step.dev/knowledgebase/<N>/...` serves version N, for diffing against the last-read version | stateful vs stateless keyword guidance, the common-mistakes list |
-| `wise-mcp` | `PrefectHQ/fastmcp`; `> **Version baseline: FastMCP X.**` in `SKILL.md` | <https://gofastmcp.com> (documents the newest line, not necessarily the baseline); Arcade's catalog at <https://www.arcade.dev/patterns>, its count in `README.md`'s badge | **most of the skill**: guiding principles, tool design, when progressive disclosure pays, the anti-patterns. Premises live in the MCP spec's changelog (`https://modelcontextprotocol.io/specification/<revision>/changelog`) and the main clients' docs |
+| `wise-mcp` | `PrefectHQ/fastmcp`; "Written against FastMCP X and MCP spec Y, the latest at the time of writing (date)" in `SKILL.md`, "Written against" in `README.md`. Names only the APIs its judgments rest on: the API itself is upstream's `fastmcp-server` skill | <https://gofastmcp.com> (unversioned pages are the current line); Arcade's catalog at <https://www.arcade.dev/patterns>, its count in `README.md`'s badge and `SKILL.md` | **the whole skill**. Its premises are the **Sources** table in `README.md`: spec, client docs, measured studies, Arcade's catalog, each with a checked date. Re-read every row, then search for newer work (vendor engineering posts, benchmarked studies, the spec's newest revision) and add a row for anything that holds up, or a "searched and not adopted" note. Measurements outrank a practitioner's catalog |
 
 Read the skill's `git log` too: the last refresh commit says what was checked then and why, and is where this refresh picks up.
 
@@ -72,8 +72,9 @@ Release notes and docs never say that our own advice went stale. Do this pass de
 
 1. List the skill's judgments — the advice that is ours, not a restatement of upstream docs (principles, "prefer X over Y", thresholds, anti-patterns).
 2. For each, write down the premise it rests on. `wise-mcp`'s old "add progressive disclosure at 10+ tools" rested on "clients load every tool schema up front".
-3. Check whether the premise still holds: the MCP spec's changelog, how the main clients behave now (their docs and release notes), the source catalog the judgment cites (Arcade), and what well-regarded current practice says.
+3. Check whether the premise still holds: the MCP spec's changelog, how the main clients behave now (their docs and release notes), the sources the skill lists, and what well-regarded current practice says. A skill's source list is where to start, not where to stop: search past it for newer measured work, because a catalog that was the best available when the skill was written can be overtaken without changing a word (`wise-mcp` leaned on Arcade alone until 2026-11-15).
 4. A premise that no longer holds puts the judgment in bucket 2. Rewrite it from the new premise, and say in the commit what changed underneath it — `05f6dc3` is the model.
+5. Keep the skill's source list current: add what you used, record what you searched and rejected, and date every row.
 
 ## 3. Check whether the skill should still exist
 
