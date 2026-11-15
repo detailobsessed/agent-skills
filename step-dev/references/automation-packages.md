@@ -94,7 +94,7 @@ Raw directory structure — supported only by the Step CLI.
 
 ### DLL (.NET)
 
-Single DLL file with keywords declared via `[Keyword]` annotation. Additional dependencies can be bundled as a ZIP library. YAML descriptors are not yet supported for .NET packages.
+Single DLL file with keywords declared via `[Keyword]` annotation, and no descriptor. Additional dependencies can be bundled as a ZIP library. To combine .NET keywords with plans or other entities, use a ZIP or folder package whose descriptor declares them as `DotNet` keywords (see [.NET](#net) below). The v31 docs are inconsistent on this; the overview still says .NET support is limited to keywords in a single DLL.
 
 ---
 
@@ -104,8 +104,9 @@ The automation package is defined in `automation-package.yaml`. Top-level fields
 
 ```yaml
 ---
-version: 1.0.0          # schema version — required for forward compatibility
+version: 1.3.0          # schema version — see the table below
 name: "my-package"       # unique identifier — updates existing package with same name on deploy
+metadata:                # optional, 1.3.0+ (also allowed on each entity)
 keywords:                # optional
 plans:                   # optional
 parameters:              # optional
@@ -119,18 +120,26 @@ fragments:               # optional (include modular YAML files)
 
 | Version | Description | Step compatibility |
 | --- | --- | --- |
+| 1.3.0 | `${...}` placeholders in plain values, `metadata` field, `callPlan` takes `plan:` instead of `selectionAttributes` | 31.x+ |
 | 1.2.0 | Password-protected data sources and Excel files | 29.x+ |
 | 1.1.1 | K6 directory support | 28.x+ |
 | 1.1.0 | Before & after sections in plans | 27.x |
 | 1.0.0 | Initial version | 24.x–26.x |
 
-Always set the `version` field explicitly to maintain forward compatibility.
+Always set the `version` field explicitly. Step migrates a package from the version it declares; **since Step 31 a package that declares no version is not migrated at all.**
+
+Moving to 1.3.0 changes behaviour, not only syntax:
+
+- A plain value containing `${` is now evaluated as a placeholder (`${var}`). Write `$${` for a literal. Packages on an earlier version keep their values literal.
+- `callPlan` rejects `selectionAttributes`; use `plan:` (a name, or a map of selection criteria) or `planId:`.
+
+`step studio open --help` lists an option that upgrades a package's schema version in place.
 
 ---
 
 ## Keywords in YAML
 
-All Step keyword types are supported except Astra, QF Test, and PDF Test. Java keywords declared with `@Keyword` in code are automatically included and do not need YAML declarations.
+All Step keyword types are supported except QF-Test and PDF Test. Java keywords declared with `@Keyword` in code are automatically included and do not need YAML declarations.
 
 ### JMeter
 
@@ -235,14 +244,17 @@ plans:
 
 ```yaml
 - callKeyword:
-    keyword: "My Keyword"
+    keyword: "My Keyword"        # a name, or a map of selection criteria
     inputs:
       - myInputNumber: 1
       - myInputBoolean: true
       - myInputString: "some input"
     routing:
-      - agentOS: "windows"
+      - OS: "Windows"
+      - browser: "chrome|edge"   # a regex that must match the whole attribute value
 ```
+
+`remote: false` runs the keyword on the controller; routing is then ignored. `resultMap` maps the keyword's outputs into plan variables. A plan is called with `callPlan`, which takes `plan:` (or `planId:`) and `input:` — singular, unlike `callKeyword`'s `inputs`.
 
 ### Thread group (load testing)
 
@@ -485,9 +497,9 @@ public void myPlanMadeOfOneKeyword() {
 }
 ```
 
-### Inline plans (deprecated)
+### Inline plans and `@Plans` (deprecated)
 
-Plain text plans defined via annotation. Declaring plans in YAML is now the recommended approach.
+Plain text plans defined inline via annotation, and plain-text plan files referenced with `@Plans`, are both deprecated and will be removed. Declare plans in YAML; a YAML descriptor can still reference a plain-text plan file.
 
 ---
 
@@ -503,9 +515,15 @@ Automation Packages can be provided from three sources:
 
 ## Automation Package Libraries
 
-AP Libraries are reusable, versioned code artifacts that provide shared logic across multiple Automation Packages — common utilities, shared keywords, shared plans. They are deployed and referenced independently from individual packages.
+AP Libraries are reusable, versioned code artifacts that provide shared logic across multiple Automation Packages, such as common utilities and keywords declared in code. They are deployed and referenced independently from individual packages.
 
-Libraries can be provided as files, Maven coordinates, or managed libraries (referenced by name on the Step server).
+Libraries can be provided as files, Maven coordinates, or managed libraries (referenced by name on the Step server; managed libraries can be updated in place, plain ones are immutable).
+
+Limits: libraries work with Java and .NET packages only, not ZIP-layout or JS/TS packages, and keywords or plans **declared in YAML** inside a library are not picked up.
+
+A prebuilt Java keyword library can also be imported directly as a `GeneralScript` keyword (`scriptLanguage: java`, `scriptFile: <the jar>`).
+
+Ready-made examples by use case (load testing, Playwright E2E, synthetic monitoring, RPA, templates): https://github.com/exense/step-samples/tree/master/automation-packages
 
 ---
 

@@ -3,6 +3,8 @@
 > Live docs:
 >
 > - Step CLI: https://step.dev/knowledgebase/devops/automation-package-cli/step-cli/
+> - Local execution: https://step.dev/knowledgebase/devops/automation-package-cli/step-cli/local-execution/
+> - Step Studio: https://step.dev/knowledgebase/devops/step-studio/
 > - Maven plugin: https://step.dev/knowledgebase/devops/automation-package-cli/ap-maven-plugin/
 > - Automation as Code (CI/CD context): https://step.dev/knowledgebase/devops/automation-as-code/
 > - Automation Package in Java (JUnit): https://step.dev/knowledgebase/devops/automation-package-java/
@@ -34,36 +36,39 @@ The Step CLI handles all Automation Package operations:
 - Execute packages locally or remotely on a Step server
 - Deploy packages to a Step server (full installation with schedule activation)
 - Deploy libraries independently
-- Works with folders, ZIPs, JARs, and Maven artifact coordinates
+- Open packages in Step Studio, a local visual editor (`step studio`, beta since Step 31)
+- Works with folders, ZIPs, JARs, an `automation-package.yaml` path, and Maven artifact coordinates
 
 ---
 
 ## Getting the CLI
 
-- **Step Open Source**: download from the [GitHub release page](https://github.com/exense/step/releases)
+- **Step Open Source**: download `step` / `step.exe` from the [step-distribution releases](https://github.com/exense/step-distribution/releases). The `exense/step` releases carry no CLI binaries.
 - **Step Enterprise**: download from the Enterprise download section
+- **Docker** (Step 31+): `docker.exense.ch/step/cli:<version>` (open source, also for Step SaaS) or `docker.exense.ch/step-enterprise/cli:<version>`; the tag is the Step version, e.g. `3.31.0`
 
 Requirements:
 
 - Use the same CLI version as your Step server
-- Java JRE 11+ must be installed
+- Java JRE 21+ (since Step 30; it was 11+ before)
 
 ---
 
 ## CLI usage and help
 
 ```bash
-step                        # top-level help
+step                        # top-level help: ap, library, studio
 step ap --help              # automation package operations
 step ap execute --help      # detailed help for execute
 step ap deploy --help       # detailed help for deploy
+step studio --help          # Step Studio
 ```
 
 ---
 
 ## Automation Package location
 
-The CLI works with folders, ZIPs, or JARs. Without the `-p` option, it treats the current directory as the package root.
+`-p` takes a folder, a ZIP or JAR, the path to an `automation-package.yaml`, or `mvn:` coordinates. Without the `-p` option, it treats the current directory as the package root.
 
 ```bash
 # Explicit path
@@ -95,15 +100,20 @@ step ap execute --local
 step ap execute --local -p /path/to/package/
 ```
 
-### Limitations
+Since Step 31, local execution starts real agents for every keyword type, so it is the package-level check before a deploy, not only a Java one:
 
-Local execution does not support:
+| Keyword type | Needs locally |
+| --- | --- |
+| Composite, Java, Groovy, JavaScript | nothing extra |
+| Node.js | `node` on `PATH` (npm for the project's dependencies) |
+| C#/.NET (Enterprise) | the Step .NET agent, via `--localAgentDotNet` or `STEP_DOTNET_AGENT_HOME` |
+| JMeter, SoapUI, k6, Cypress, … | the tool's runtime, via its env var (`JMETER_HOME`, `SOAP_UI_HOME`, …) |
 
-- Node.js keywords
-- .NET keywords
-- SoapUI keywords
-- Silk Performer keywords
-- Java keywords requiring package libraries
+**Not supported locally:** Silk Performer and QFTest (not yet), and PDF Compare, whose keyword is provided by the Step server. Package libraries work locally: `--library=./my-library.jar`.
+
+Local-only options: `--localAgentJava`, `--localAgentNode`, `--localAgentDotNet`, `--localAgentWorkDir`, `--localAgentMaxTokens` (default 5), `--localAgentStartTimeout` (default 60 s), and `--localAgentVmArgs` (repeatable; pass a JDWP string to attach a debugger to the Java agent). `--verbose` and `--debug` raise the log level.
+
+**`--reportType` does not apply to local runs** — reports are generated for remote executions only, and passing it with `--local` is an error.
 
 ---
 
@@ -173,6 +183,18 @@ step ap deploy \
   --stepUrl=http://localhost:8080 \
   -p "mvn:groupId:artefactId:version"
 ```
+
+### Deployment options
+
+| Option | Effect |
+| --- | --- |
+| `--async` | return without waiting for the deployment to finish |
+| `--deployment-timeout` | how long to wait for it (default 300 s) |
+| `--tokenSelectionCriteria="k=v\|k=v"` | agent token routing for the package's keywords |
+| `--executeKeywordsOnController` | run the keywords on the controller instead of agents |
+| `--plansAttributes`, `--keywordsAttributes` | pipe-delimited attributes added to every plan / keyword (package values win over keyword-level ones) |
+
+`step ap execute` also takes `--executionTimeoutS` (default 3600). Confirm names with `step ap deploy --help`; the Maven plugin has camel-case equivalents (`async`, `deploymentTimeout`, …).
 
 ### Deploy with libraries
 
@@ -245,6 +267,8 @@ These options can be combined.
 
 ## Execution reports
 
+Remote executions only; see [Local execution](#local-execution).
+
 ```bash
 # JUnit XML report (written to file by default)
 step ap execute --reportType=junit
@@ -313,6 +337,17 @@ Parameters from all sources are merged. When a key is defined multiple times, th
 ## Maven plugin
 
 For Java projects, the Maven plugin provides the same operations as the CLI.
+
+**Since Step 30.5 the plugin is not on Maven Central.** Versions 3.30.5 and later live in Exense's open source repository; without it Maven fails with "plugin not found". Earlier versions remain on Central. Enterprise uses `https://nexus-enterprise.exense.ch/repository/exense/`.
+
+```xml
+<pluginRepositories>
+    <pluginRepository>
+        <id>exense-oss</id>
+        <url>https://repository.exense.ch/maven-oss/</url>
+    </pluginRepository>
+</pluginRepositories>
+```
 
 ### Execute remotely
 
@@ -393,6 +428,8 @@ public class RunAutomationPackageTest {}
 **3. System properties:** same mapping as environment variables (`-DSTEP_MyParam=value`)
 
 ### Required dependencies
+
+The JUnit artifacts moved off Maven Central with the plugin (Step 30.5+): declare the same `exense-oss` URL under `<repositories>`. The Keyword API (`step-api-keyword`) is still on Central.
 
 ```xml
 <!-- Step OS, JUnit 4 -->

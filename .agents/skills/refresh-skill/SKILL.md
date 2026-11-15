@@ -26,7 +26,7 @@ What each skill currently rests on:
 | Skill | Release stream | Docs | Our judgments |
 | --- | --- | --- | --- |
 | `git-spice` | `abhinav/git-spice`; baseline `> This skill is written against **git-spice vX**` in `SKILL.md`, `Written against` in `README.md` | `git-spice -h` and <https://abhinav.github.io/git-spice/> | staging rules, the daily workflow |
-| `step-dev` | `exense/step` (tags `3.N.x`; how they map to the docs' `vN` is unconfirmed) | **primary**: the `step.dev/knowledgebase` pages cited in `references/*.md`; "based on the vN documentation" in `SKILL.md` | stateful vs stateless keyword guidance, the common-mistakes list |
+| `step-dev` | `exense/step` (tags `3.N.x` = docs `vN`, confirmed for 29–31); the Java Keyword API releases separately (`exense/step-api`) | **primary**: the `step.dev/knowledgebase` pages cited in `references/*.md`; "based on the vN documentation … last read on" in `SKILL.md`. No public docs source; `https://step.dev/knowledgebase/<N>/...` serves version N, for diffing against the last-read version | stateful vs stateless keyword guidance, the common-mistakes list |
 | `wise-mcp` | `PrefectHQ/fastmcp`; `> **Version baseline: FastMCP X.**` in `SKILL.md` | <https://gofastmcp.com> (documents the newest line, not necessarily the baseline); Arcade's catalog at <https://www.arcade.dev/patterns>, its count in `README.md`'s badge | **most of the skill**: guiding principles, tool design, when progressive disclosure pays, the anti-patterns. Premises live in the MCP spec's changelog (`https://modelcontextprotocol.io/specification/<revision>/changelog`) and the main clients' docs |
 
 Read the skill's `git log` too: the last refresh commit says what was checked then and why, and is where this refresh picks up.
