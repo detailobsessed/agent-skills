@@ -109,7 +109,7 @@ Three optional module-level hooks can be exported alongside keywords:
 
 - `beforeKeyword(functionName)` — called before each keyword execution
 - `afterKeyword(functionName)` — called after each keyword execution, even on failure
-- `onError(exception, input, output, session, properties)` — called on error; return `true` to propagate, `false` to suppress (the keyword then reports PASSED, with no error)
+- `onError(exception, input, output, session, properties)` — called on error; return `true` to propagate, `false` to suppress. Suppressing only skips recording the exception: an error the hook or the keyword already set on `output` still fails the keyword
 
 ---
 
