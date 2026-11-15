@@ -1,0 +1,133 @@
+---
+name: refresh-skill
+description: Bring a skill in this repo up to date with what it was built from — a tool's releases, a product's docs, or our own design judgments and the ecosystem they rest on. Finds what changed since the skill was last checked, fixes the advice that is now wrong, adds what is new, or retires the skill when something better covers it. Use when the user asks to update, refresh, review or audit a skill here, when a skill's upstream has released or its docs moved, when a skill has not been looked at in months, or when an agent following one of these skills hit an error the skill did not predict.
+metadata:
+  internal: true
+---
+
+# Refresh a skill
+
+The skills in this repo each describe something that keeps moving. A stale skill does not just miss features — it tells the agent to do things that no longer work, or no longer make sense, and the agent follows it with confidence. A refresh exists to find and fix that advice first. New material comes second.
+
+This skill is how this repo is maintained, not a skill to publish. It lives in `.agents/skills/` (Claude Code reads it through the `.claude/skills` symlink, Devin directly), and `metadata.internal: true` keeps `skills add` from offering it. The `skills` CLI scans `.claude/` and `.agents/` too, so the flag is what keeps it out, not the location. Check with `skills add . --list`.
+
+## 1. Find what the skill was built from
+
+Skills here rest on three kinds of source, and most rest on more than one. Each changes in a different way, so each needs a different check:
+
+| Kind | Changes by | How to see what changed |
+| --- | --- | --- |
+| **Release stream** — a versioned tool or library | tagged releases | release notes for every release since the baseline (step 2a) |
+| **Docs** — a product's documentation site | pages edited in place, often with no release to point at | re-read each page the skill cites and compare it with the skill's claims (step 2b) |
+| **Our judgments** — design advice we synthesised ourselves | the premises under it going stale: client behaviour, the protocol, current practice | list the judgments, find the premise under each, re-check the premise (step 2c) |
+
+What each skill currently rests on:
+
+| Skill | Release stream | Docs | Our judgments |
+| --- | --- | --- | --- |
+| `git-spice` | `abhinav/git-spice`; baseline `> This skill is written against **git-spice vX**` in `SKILL.md`, `Written against` in `README.md` | `git-spice -h` and <https://abhinav.github.io/git-spice/> | staging rules, the daily workflow |
+| `step-dev` | `exense/step` (tags `3.N.x`; how they map to the docs' `vN` is unconfirmed) | **primary**: the `step.dev/knowledgebase` pages cited in `references/*.md`; "based on the vN documentation" in `SKILL.md` | stateful vs stateless keyword guidance, the common-mistakes list |
+| `wise-mcp` | `PrefectHQ/fastmcp`; `> **Version baseline: FastMCP X.**` in `SKILL.md` | <https://gofastmcp.com> (documents the newest line, not necessarily the baseline); Arcade's catalog at <https://www.arcade.dev/patterns>, its count in `README.md`'s badge | **most of the skill**: guiding principles, tool design, when progressive disclosure pays, the anti-patterns. Premises live in the MCP spec's changelog (`https://modelcontextprotocol.io/specification/<revision>/changelog`) and the main clients' docs |
+
+Read the skill's `git log` too: the last refresh commit says what was checked then and why, and is where this refresh picks up.
+
+Every source a skill rests on needs a marker saying when it was last checked: a version for a release stream, a docs version plus the date read for docs, a "reviewed" date for judgments. If one is missing, adding it is part of this refresh — without it the next refresh cannot tell what is stale. Update the table above when a skill is added, retired, or what it rests on changes.
+
+## 2. Find what changed
+
+Sort every finding into one of four buckets as you go:
+
+1. **Breaks the skill's advice** — removed or renamed commands, flags, APIs or config keys; changed defaults; features moved behind an experiment flag; a doc page that now says the opposite. These are the reason for the refresh.
+2. **Makes the advice obsolete** — the skill works around a gap that has since closed, or argues from a premise that no longer holds. Advice that pushes toward a workaround you no longer need is worse than none (the reason `macos-expert` was retired).
+3. **New and worth teaching** — something an agent would plausibly need and would not find on its own.
+4. **Noise** — bug fixes and internals that change nothing an agent does. Skip them.
+
+### 2a. Release stream
+
+Check how far behind the baseline is, then read the notes for **every** release since it, oldest first, not just the latest. Behaviour changes hide in minor releases (git-spice v0.29.0 changed what `--restack` means).
+
+```bash
+repo=abhinav/git-spice
+gh release list -R "$repo" --limit 50 --json tagName,publishedAt,isPrerelease \
+  --jq '.[] | "\(.publishedAt[:10]) \(.tagName)\(if .isPrerelease then " (pre)" else "" end)"'
+gh release view -R "$repo" <tag> --json body --jq .body   # per tag, oldest first
+```
+
+Where upstream keeps a `CHANGELOG.md` or a `.changes/` directory instead, read that.
+
+When a new major line appears, decide which line the skill describes, and say so in the baseline marker. While the major is a prerelease, keep the stable line and describe the new one in a `references/` file (FastMCP 4 during the 3.4.5 refresh). Once it is stable, the default is to move the baseline to it and keep the old line's differences in a reference for users still on it.
+
+### 2b. Docs
+
+Docs change without telling anyone, so there is nothing to diff against. Load the `web-research` skill, then:
+
+1. List the pages the skill cites (`rg -o 'https://[^ )>]+' <skill>/`).
+2. Fetch each one and compare it with the claims the skill makes from it. Note pages that moved, vanished, or changed their advice.
+3. Look for new pages in the same docs sections that cover ground the skill does not.
+4. Read the product's release notes for the same period anyway: they say which pages were likely to change.
+
+### 2c. Our judgments
+
+Release notes and docs never say that our own advice went stale. Do this pass deliberately:
+
+1. List the skill's judgments — the advice that is ours, not a restatement of upstream docs (principles, "prefer X over Y", thresholds, anti-patterns).
+2. For each, write down the premise it rests on. `wise-mcp`'s old "add progressive disclosure at 10+ tools" rested on "clients load every tool schema up front".
+3. Check whether the premise still holds: the MCP spec's changelog, how the main clients behave now (their docs and release notes), the source catalog the judgment cites (Arcade), and what well-regarded current practice says.
+4. A premise that no longer holds puts the judgment in bucket 2. Rewrite it from the new premise, and say in the commit what changed underneath it — `05f6dc3` is the model.
+
+## 3. Check whether the skill should still exist
+
+Before editing, check whether another maintained skill now covers the same ground better. It takes one command, so run it every time rather than reasoning that nothing could have replaced ours:
+
+```bash
+skills find <topic>   # e.g. fastmcp; works without a terminal, lists install counts
+```
+
+Upstreams publish their own skills now (gofastmcp.com ships `fastmcp-server`), so look hardest at entries from the upstream's own org. If one does, and tracks the newer upstream where ours stopped, retire ours rather than refresh it:
+
+- delete the skill directory in one commit;
+- add an entry under `### Retired` in the root `README.md` with the date, the replacement, and why — so the decision can be re-checked later;
+- name anything worth recovering from git history.
+
+`b47f466` (macos-expert → Axiom) is the worked example.
+
+## 4. Verify before writing
+
+Test each bucket-1 and bucket-3 claim before it goes into the skill: run the installed tool's `-h`, run the command in a scratch repo, install the new library version in a throwaway project (`uv init` in the scratchpad, `uv add <pkg>==<version>`), read the source where the notes are vague. A release note says what changed; it rarely says what it means for a user who followed the old advice. That consequence is what the skill has to say.
+
+Finding a name in the docs is not verification. Run the code. In a test refresh, an agent that grepped FastMCP's docs listed `require_auth` as "verified still true"; an agent that imported it found it exists in neither 3.4.11 nor 4.2.0. In the report, mark each claim as run or docs-only, so the reviewer knows which ones to trust.
+
+## 5. Edit
+
+Fix bucket 1 first, then bucket 2, then add bucket 3.
+
+- Correct wrong advice where it stands; do not append a "changes in vX" section that leaves the old text in place for an agent to follow.
+- Keep a version note inline only where behaviour differs between releases a user might still run (git-spice's "v0.28.0+" fork-mode note). Drop stale "new in vX" markers for releases everyone is past.
+- Move every marker from step 1 to what you checked, in `SKILL.md` and the skill's `README.md`.
+- Stay inside the validator's budget: `SKILL.md` body ≤ 500 lines and ~5000 words. When a section grows, move the detail into `references/<topic>.md` and leave a one-line pointer, as `wise-mcp/references/fastmcp-4.md` does.
+- Keep the frontmatter `description` third-person with a "Use when" trigger; if the refresh changed what the skill covers, update it.
+- Update the root `README.md` skill list if the skill's one-line summary changed.
+
+## 6. Validate
+
+```bash
+uv run python scripts/validate_skills.py
+prek run --all-files --hook-stage pre-push agentskills-validate typos markdownlint ruff-check ruff-format ty
+prek run --all-files --hook-stage pre-push lychee   # links; not run in CI, so run it here
+```
+
+Keep `--hook-stage pre-push`: these hooks are declared pre-push only, and without the flag `prek` runs none of them, prints nothing and exits 0. Each hook must print `Passed`; an empty output is a check that did not happen. All three must pass before the changeset goes to review. A lychee failure in a skill you did not touch is still worth a line in the report, not a fix in this commit. `typos` rewriting a CLI literal is a known trap: add the literal to `_typos.toml` rather than accepting the rewrite.
+
+They check format, not behaviour. For a refresh that rewrites advice, the behavioural check is `skill-creator`'s comparison loop: the refreshed skill against the pre-refresh one (it snapshots the old version), on prompts that hit the changed advice, such as "sync my stack after the base merged" for git-spice's `--restack` change. It costs two agent runs per prompt. Do not skip it silently: put it in the review post as a decision, with the prompts you would use and the cost, and run it if the user says yes.
+
+## 7. Commit
+
+One commit per skill, so each refresh can be reviewed and reverted on its own. Hand the changeset over for review in Tower before committing (the `tower-review` skill).
+
+Subject: `docs(<skill>): update for <upstream> vA through vB` for a release-driven refresh, `docs(<skill>): refresh for <what changed>` otherwise.
+
+Body: lead with what an agent following the old skill got wrong and what happened when it did, then what was added, then what was dropped and why. `fc496ab` and `05f6dc3` are the models. End with `Refs`/`Closes` for the Linear issue.
+
+## Refreshing several skills
+
+Open one Linear issue in the `agent-skills` project with a checklist item per skill, tick items off as each commit lands, and put all the commits on one branch for a single PR — the shape of PR #13.

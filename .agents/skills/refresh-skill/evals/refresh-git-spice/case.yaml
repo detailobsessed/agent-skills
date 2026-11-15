@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: refresh-git-spice
+expected_outcome: |
+  The git-spice skill is moved from its v0.31.2 baseline to the latest release, after reading
+  the notes for every release in between. Advice those releases broke is corrected in place,
+  claims are checked against the installed git-spice, validation passes, and a commit message
+  explains what an agent following the old skill would have got wrong.

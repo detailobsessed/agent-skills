@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: refresh-wise-mcp
+expected_outcome: |
+  The wise-mcp skill is refreshed on all three things it rests on: FastMCP releases since 3.4.5
+  (including a decision on the now-stable 4.x line), the Arcade pattern catalog, and the skill's
+  own design judgments, whose premises (client behaviour, the MCP spec) are re-checked rather
+  than assumed. Validation passes and SKILL.md stays inside the size budget.

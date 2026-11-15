@@ -77,6 +77,8 @@ rev = "v0.49.1"
 hooks = [
   {
     id = "markdownlint",
+    # skill-creator test cases open with a settings block in the format `claude plugin eval` reads, not a heading.
+    exclude = "(^|/)evals/",
     priority = 1,
     stages = ["pre-push"],
     types_or = ["markdown"]

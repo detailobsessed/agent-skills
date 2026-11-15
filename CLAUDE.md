@@ -38,7 +38,15 @@ This repo uses `prek` (Rust-based git hook framework). `prek install` installs o
 
 GitHub Actions runs on PR and push to main: syncs deps, then runs `prek` with `agentskills-validate typos markdownlint ruff-check ruff-format ty`. The `lychee` link checker is configured in `prek.toml` but not run in CI.
 
+## Updating a Skill
+
+To bring a skill up to date with a new upstream release, or to retire it, follow the project skill `.agents/skills/refresh-skill/SKILL.md`.
+
+Project skills that maintain this repo live in `.agents/skills/`; `.claude/skills` is a symlink to it, so Claude Code and Devin both load them. Give each one `metadata: {internal: true}`: the `skills` CLI discovers `.agents/` and `.claude/` too, and without the flag `skills add` offers the skill to anyone installing from this repo. `skills add . --list` shows what is published. The validator checks these skills as well.
+
 ## Adding a New Skill
+
+Load the `skill-creator` skill before writing or substantially rewriting any skill here, project skills under `.agents/skills/` included. It asks the scoping questions up front and tests the skill against runs without it. The validator and prek only check format, so a skill that passes them can still change nothing an agent does.
 
 1. `skills init <name>` — creates `<name>/SKILL.md` with starter frontmatter
 2. Replace the generated `SKILL.md` with real content

@@ -1,3 +1,5 @@
 .venv/
-.claude/
+# Local Claude Code state stays out; project skills that maintain this repo are tracked.
+.claude/*
+!.claude/skills
 .serena/
