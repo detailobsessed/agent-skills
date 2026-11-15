@@ -55,7 +55,7 @@ gh release view -R "$repo" <tag> --json body --jq .body   # per tag, oldest firs
 
 Where upstream keeps a `CHANGELOG.md` or a `.changes/` directory instead, read that.
 
-When a new major line appears, decide which line the skill describes, and say so in the baseline marker. While the major is a prerelease, keep the stable line and describe the new one in a `references/` file (FastMCP 4 during the 3.4.5 refresh). Once it is stable, the default is to move the baseline to it and keep the old line's differences in a reference for users still on it.
+A skill describes one version: the latest stable release at the time of writing, named once in the baseline line. Move it there, across a new major line too, and leave a prerelease alone until it is stable. Write no migration notes, no "new in vX" or "removed in vY" markers, and no reference for users on an older line: they age badly, and an agent on an old release has upstream's versioned docs. What a release breaks matters only for finding the advice to rewrite.
 
 ### 2b. Docs
 
@@ -91,6 +91,8 @@ Upstreams publish their own skills now (gofastmcp.com ships `fastmcp-server`), s
 
 `b47f466` (macos-expert → Axiom) is the worked example.
 
+When an upstream skill covers only part of ours, usually the API, narrow ours to what it doesn't cover instead of retiring it. Drop what theirs says, point to it, and keep our own judgment. Don't take on the upstream author's personal setup or conventions along the way. `wise-mcp` against gofastmcp.com's `fastmcp-server` is the example: theirs routes to the API docs, ours keeps the design advice.
+
 ## 4. Verify before writing
 
 Test each bucket-1 and bucket-3 claim before it goes into the skill: run the installed tool's `-h`, run the command in a scratch repo, install the new library version in a throwaway project (`uv init` in the scratchpad, `uv add <pkg>==<version>`), read the source where the notes are vague. A release note says what changed; it rarely says what it means for a user who followed the old advice. That consequence is what the skill has to say.
@@ -102,9 +104,9 @@ Finding a name in the docs is not verification. Run the code. In a test refresh,
 Fix bucket 1 first, then bucket 2, then add bucket 3.
 
 - Correct wrong advice where it stands; do not append a "changes in vX" section that leaves the old text in place for an agent to follow.
-- Keep a version note inline only where behaviour differs between releases a user might still run (git-spice's "v0.28.0+" fork-mode note). Drop stale "new in vX" markers for releases everyone is past.
+- Describe the latest release only (step 2a): remove any version notes and "new in vX" markers you find, rather than adding more.
 - Move every marker from step 1 to what you checked, in `SKILL.md` and the skill's `README.md`.
-- Stay inside the validator's budget: `SKILL.md` body ≤ 500 lines and ~5000 words. When a section grows, move the detail into `references/<topic>.md` and leave a one-line pointer, as `wise-mcp/references/fastmcp-4.md` does.
+- Stay inside the validator's budget: `SKILL.md` body ≤ 500 lines and ~5000 words. When a section grows, move the detail into `references/<topic>.md` and leave a one-line pointer, as `wise-mcp/references/scaling-large-catalogs.md` does.
 - Keep the frontmatter `description` third-person with a "Use when" trigger; if the refresh changed what the skill covers, update it.
 - Update the root `README.md` skill list if the skill's one-line summary changed.
 
