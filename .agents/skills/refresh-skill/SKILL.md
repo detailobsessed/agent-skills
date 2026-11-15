@@ -141,6 +141,8 @@ Subject: `docs(<skill>): update for <upstream> vA through vB` for a release-driv
 
 Body: lead with what an agent following the old skill got wrong and what happened when it did, then what was added, then what was dropped and why. `fc496ab` and `05f6dc3` are the models. End with `Refs`/`Closes` for the Linear issue.
 
+In the same commit, add the refresh to `CHANGELOG.md` under `Unreleased`: one bullet per change an agent would notice, each opening with the skill's name in bold, under `Fixed` for advice that was wrong, `Changed`, `Added` or `Removed` for the rest. A retired skill goes under `Removed` with its replacement. The changelog is for people who installed the skill, so it says what their agent now does differently, and leaves the evidence to the commit.
+
 ## Refreshing several skills
 
 Open a parent issue in the `agent-skills` Linear project with one sub-issue per skill, so each refresh shows on the board and its own commit closes it (`Closes DOT-nnn`). Put all the commits on one branch for a single PR, the shape of PR #16. A checklist inside an issue is only for steps within one commit.

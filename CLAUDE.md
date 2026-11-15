@@ -46,6 +46,16 @@ GitHub Actions runs on PR and push to main: syncs deps, then runs `prek` with `s
 
 Open a PR (via `git-spice branch submit`) for a change to the tooling (`prek.toml`, `pyproject.toml`, `uv.lock`, `.github/`, `scripts/`) or to the advice a skill gives. Devin Review checks those against `REVIEW.md`, and on PR #14 it caught a prek pin that passed every local check. Push everything else straight to `main` after the Tower review: typo fixes, README wording, a broken link. When unsure, open the PR.
 
+## Changelog and Releases
+
+`CHANGELOG.md` follows Keep a Changelog 1.1.0 and lists changes to the published skills only, never tooling or project skills. A commit that changes a skill's advice adds its entry under `Unreleased` (REVIEW.md says what an entry needs).
+
+A release is a dated tag, `YEAR.MONTH.DAY` with no leading zeros (`2026.3.6`, not `2026.03.06`, which is not a valid semantic version), at most one a day. Cut one on `main` the same day a merge leaves entries under `Unreleased`: `gh skill install` resolves to the latest release, not `main`, so a fix that is merged but not released never reaches its users. `gh skill publish` would create the release too, but only with auto-generated notes, so use `gh release create`:
+
+1. In `CHANGELOG.md`, rename `## [Unreleased]` to `## [<version>] - <YYYY-MM-DD>`, add an empty `## [Unreleased]` above it, and update the compare links at the bottom. Commit `docs(changelog): release <version>` to `main` after the Tower review.
+2. `git tag <version> && git push origin main <version>`
+3. `awk "/^## \[<version>\]/{f=1;next} /^## \[/{f=0} f" CHANGELOG.md > notes.md`, then `gh release create <version> --title <version> --notes-file notes.md`.
+
 ## Updating a Skill
 
 To bring a skill up to date with a new upstream release, or to retire it, follow the project skill `.agents/skills/refresh-skill/SKILL.md`.

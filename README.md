@@ -4,6 +4,8 @@ My personal collection of [agent skills](https://skills.sh/) I created and maint
 
 This repository is intended to work directly with the `skills.sh` ecosystem and CLI.
 
+What changed in each skill, release by release, is in [CHANGELOG.md](CHANGELOG.md). Each release is a git tag named by its date, such as `2026.11.15`. `gh skill install` installs the latest release. With `skills`, pin one by adding it to the source: `skills add detailobsessed/agent-skills@2026.11.15 --skill git-spice`.
+
 ## Using this repository with `skills`
 
 The installed CLI is available as either:
