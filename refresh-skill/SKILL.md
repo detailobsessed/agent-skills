@@ -46,7 +46,7 @@ gh release view -R "$repo" <tag> --json body --jq .body   # per tag, oldest firs
 
 Where upstream keeps a `CHANGELOG.md` or a `.changes/` directory instead, read that.
 
-A skill describes one version: the latest stable release at the time of writing, named once in the baseline line. Move the baseline there, across a new major line too, and leave a prerelease alone until it is stable. What a release breaks matters only for finding the advice to rewrite. An agent on an older release has upstream's versioned docs.
+A skill describes one version: the latest stable release at the time of writing, named once in the baseline line. Move the baseline there, across a new major line too, and leave a prerelease alone until it is stable. What a release breaks matters only for finding the advice to rewrite: don't add an upgrade or migration section, a pointer to an upgrade guide, or a reference for the old line. An agent on an older release has upstream's versioned docs.
 
 ### 2b. Docs
 
@@ -81,7 +81,7 @@ Upstreams publish their own skills, so look hardest at entries from the upstream
 - record the retirement where the repo lists its skills, with the date, the replacement and why, so the decision can be re-checked later;
 - name anything worth recovering from git history.
 
-When an upstream skill covers only part of this one, usually the API, narrow this one to what it doesn't cover instead of retiring it. Drop what theirs says, point to it, and keep the judgment. Don't take on the upstream author's personal setup or conventions along the way.
+When an upstream skill covers only part of this one, usually the API, narrow this one to what it doesn't cover instead of retiring it. Drop what theirs says, keep the judgment, and name their skill in this one, with where to install it, so an agent knows to load both. Deciding not to retire is half of this step: the skill has to say where the rest lives. Don't take on the upstream author's personal setup or conventions along the way.
 
 ## 4. Verify before writing
 
@@ -100,7 +100,7 @@ Run it the way an agent runs it, and run every path the skill prescribes:
 Fix bucket 1 first, then bucket 2, then add bucket 3.
 
 - Correct wrong advice where it stands. A "changes in vX" section appended after advice it contradicts leaves the old text in place for an agent to follow.
-- Write skill text that stays true without a date attached. No "now supports", "new in vX", "added in", "removed in" or "as of": describe what is true of the baseline release, and remove such markers where you find them. Release history belongs in the commit and the changelog.
+- Write skill text that stays true without a date attached. No "now supports", "new in vX", "added in", "removed in" or "as of": describe what is true of the baseline release, and remove such markers where you find them. Release history belongs in the commit and the changelog. Warning against an API that no longer exists is fine when agents still reach for it from older training data: say in the present tense that it does not exist and what to use instead, not when it went away.
 - Leave out an item with no natural home in the skill, rather than wedging a sentence between unrelated sections or adding a section just for it. Add a section only when the concept is substantial, reusable and clearly missing.
 - Move every marker from step 1 to what you checked.
 - Keep `SKILL.md` within the spec's budget: a body of at most 500 lines and 5,000 tokens. When a section grows, move the detail into `references/<topic>.md` and leave a one-line pointer saying when to read it.
@@ -108,9 +108,9 @@ Fix bucket 1 first, then bucket 2, then add bucket 3.
 
 ## 6. Account for every finding
 
-Every finding from step 2 outside bucket 4 ends in exactly one place in the report:
+Every finding from step 2 outside bucket 4 ends in exactly one place in the report. Write all three headings every time, with "None" under an empty one, so the reader can tell an empty group from a skipped one:
 
-- **Changed** — the edit, the file, and whether its claim was run or docs-only.
+- **Changed** — the edit, the file, and one mark: run, docs-only, or editorial for a change that makes no claim (wording, a removed marker).
 - **No skill change needed** — verified, but with no natural home or too narrow to teach. Say why, and link the source.
 - **Needs manual authoring** — the change is real, but its details could not be verified (no schema, no docs, no way to run it). Say what is known and where to check later. Don't write it into the skill unverified.
 

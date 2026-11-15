@@ -1,0 +1,11 @@
+# A repo other than this one, with none of its maintenance notes: the skill under test must find
+# what the stale skill rests on by itself, including the premises under its own advice.
+schema_version: "1.1"
+name: stale-judgment-skill
+context:
+  scaffold_script: place-files.sh
+expected_outcome: |
+  The wise-mcp skill's own judgments are listed with the premise under each, and the premises are
+  re-checked. The advice to add progressive disclosure at 10+ tools is rewritten, since clients
+  now defer tool loading themselves. FastMCP's own skill is found and the skill points to it for
+  the API. API claims are checked by running FastMCP, and the report accounts for every finding.
