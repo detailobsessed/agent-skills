@@ -24,6 +24,11 @@ Update this table when a skill is added, retired, or what it rests on changes.
   ```
 
   Keep `--hook-stage pre-push`: without it `prek` runs none of these hooks, prints nothing and exits 0. Stage new files first, since `--all-files` skips untracked ones. A lychee failure in a skill you did not touch is worth a line in the report, not a fix in this commit. `typos` rewriting a CLI literal is a known trap: add the literal to `_typos.toml` rather than accepting the rewrite.
+- **Description tuning** (skill-creator's `run_loop`) reads 0 triggers and a flat 50% unless two things are fixed first. Hit on refresh-skill, 2026-11-16: two full runs measured nothing.
+  1. Its workers share one `.claude/commands/` folder, so each probe sees every other worker's copy of the skill, and only the one Claude picks counts as triggered. Run a scratchpad copy of skill-creator's `scripts/` with `run_single_query` giving each probe its own empty project folder.
+  2. In a Rex tab, Rex's start-up hook tells each probe it runs in Rex, and its first tool call becomes a `rex` command, which counts as no trigger. Start the loop under `env -u REX_SERVER -u REX_SESSION -u REX_BLOCK`.
+
+  Run it from a folder that has an empty `.claude/` (it takes the nearest `.claude/` above the working directory as the project), with `PYTHONPATH` pointing at the copy. Before the full loop, run `run_eval` on four should-trigger queries with `--num-workers 4` and check all four trigger.
 - **Review:** every changeset goes to review in Tower before it is committed (the `tower-review` skill).
 - **Changelog and releases:** `CHANGELOG.md`, with the rules in `CLAUDE.md` under "Changelog and Releases".
 - **No README in a skill directory:** `skills add` copies everything in it into the install, so markers live in `SKILL.md` and `references/`, and the root `README.md` lists the skills. Update its entry if a skill's one-line summary changed, and record a retirement under its `### Retired` heading.
