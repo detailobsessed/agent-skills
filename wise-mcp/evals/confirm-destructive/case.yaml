@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: confirm-destructive
+expected_outcome: |
+  delete_repo gets a confirmation step that works on current-protocol clients (an input-required result, an approval UI, or a two-step confirm), deletes nothing before confirmation, and the answer says which clients the mechanism works with.
+context:
+  scaffold_script: place-files.sh

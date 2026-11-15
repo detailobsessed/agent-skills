@@ -13,6 +13,12 @@ dev = [
 [tool.ruff]
 target-version = "py314"
 line-length = 100
+# Eval fixtures are deliberately rough input for an agent to fix, and import
+# libraries this repo does not install.
+extend-exclude = ["*/evals/*/files"]
 
 [tool.ty.environment]
 python-version = "3.14"
+
+[tool.ty.src]
+exclude = ["*/evals/*/files"]

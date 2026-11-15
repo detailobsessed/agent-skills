@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: gateway-search
+expected_outcome: |
+  The recommendation advises against server-side search for this catalog and these clients, because Claude Code and Cursor already defer tool loading, and names when it would pay off.
