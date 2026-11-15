@@ -43,14 +43,14 @@ Validation tooling is configured at the repository root:
 
 - `pyproject.toml` provides the shared Python tooling definition
 - `prek.toml` runs formatting and quality checks across all skills in the repo
-- official Agent Skills spec validation runs via `scripts/validate_skills.py`, which discovers top-level skill directories and invokes `uv run agentskills validate <skill-dir>` for each one
+- Agent Skills spec validation runs through [skill-validator](https://github.com/agent-ecosystem/skill-validator), and `scripts/validate_skills.py` adds the best-practices rules it does not check yet
 
 This is intentional: spell-checking, dead-link checking, TOML validation, and related checks should apply consistently to every skill instead of being duplicated inside each skill directory.
 
-Run the official skill validation for all current skills from the repo root with:
+Run the skill validation for all current skills from the repo root with:
 
 ```bash path=null start=null
-uv run python scripts/validate_skills.py
+prek run --all-files --hook-stage pre-push skill-validator skill-validator-project skill-best-practices
 ```
 
 If GitButler is managing `pre-commit`, prefer leaving that hook in place and using `prek` primarily for `pre-push`. This repo is configured so a plain `prek install` installs only `pre-push` by default, which avoids overwriting a custom or GitButler-managed `pre-commit` hook.
@@ -117,11 +117,10 @@ The preferred workflow here is:
 4. Run repository validation from the root:
 
     ```bash path=null start=null
-    uv run python scripts/validate_skills.py
     prek run --all-files
     prek run --all-files --hook-stage pre-push
     ```
 
-    The second run is the one that matters: typos, markdownlint, ruff, ty, the validator and lychee are pre-push hooks, and `prek run` without `--hook-stage pre-push` skips them silently.
+    The second run is the one that matters: typos, markdownlint, ruff, ty, the validators and lychee are pre-push hooks, and `prek run` without `--hook-stage pre-push` skips them silently.
 
 5. Commit the change in small, reviewable steps

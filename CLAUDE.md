@@ -12,12 +12,14 @@ A collection of [agent skills](https://skills.sh/) — LLM-optimized instruction
 # Install dependencies (Python 3.14+, uv required)
 uv sync --locked --group dev
 
-# Validate all skills against the Agent Skills spec
+# Validate the skills: skill-validator for the Agent Skills spec, our script for the best-practices rules it lacks.
+# prek builds skill-validator from the pinned tag; to run it directly, `brew install agent-ecosystem/tap/skill-validator`.
+skill-validator check . --allow-dirs=evals && skill-validator check .agents/skills --allow-dirs=evals
 uv run python scripts/validate_skills.py
 
-# Run all pre-push checks (validation + typos + markdown lint + python lint/type).
+# Run all pre-push checks (validation + typos + markdown lint + python lint/type), the same list CI runs.
 # --hook-stage pre-push is required: these hooks are pre-push only, and without it prek runs nothing and exits 0.
-prek run --all-files --hook-stage pre-push agentskills-validate typos markdownlint ruff-check ruff-format ty
+prek run --all-files --hook-stage pre-push skill-validator skill-validator-project skill-best-practices typos markdownlint ruff-check ruff-format ty
 
 # Run the full suite: pre-commit builtins, then every pre-push hook including lychee link checking
 prek run --all-files && prek run --all-files --hook-stage pre-push
@@ -28,7 +30,9 @@ skills init <name>
 
 ## Skill Discovery
 
-Skills are auto-discovered by `scripts/validate_skills.py`: any top-level directory (not starting with `.`) that contains a `SKILL.md` file is treated as a skill. Each `SKILL.md` must have YAML frontmatter with `name` and `description` fields.
+Any top-level directory (not starting with `.`) that contains a `SKILL.md` file is a skill, and so is each directory under `.agents/skills/`. Each `SKILL.md` must have YAML frontmatter with `name` and `description` fields.
+
+[skill-validator](https://github.com/agent-ecosystem/skill-validator) checks them against the spec, including the 5,000-token body budget, and exits non-zero on a warning as well as an error. `check .` skips dot-directories, so `.agents/skills` gets a run of its own. `scripts/validate_skills.py` holds only the four best-practices rules skill-validator lacks (third-person description, a "Use when" trigger, a contents heading in a reference over 100 lines, no time-sensitive wording). Delete it and its `skill-best-practices` hook once agent-ecosystem/skill-validator#108 ships them.
 
 ## Hook Setup
 
@@ -36,7 +40,7 @@ This repo uses `prek` (Rust-based git hook framework). `prek install` installs o
 
 ## CI
 
-GitHub Actions runs on PR and push to main: syncs deps, then runs `prek` with `agentskills-validate typos markdownlint ruff-check ruff-format ty`. The `lychee` link checker is configured in `prek.toml` but not run in CI.
+GitHub Actions runs on PR and push to main: syncs deps, then runs `prek` with `skill-validator skill-validator-project skill-best-practices typos markdownlint ruff-check ruff-format ty`. The `lychee` link checker is configured in `prek.toml` but not run in CI.
 
 ## PRs or main
 
@@ -55,5 +59,5 @@ Load the `skill-creator` skill before writing or substantially rewriting any ski
 1. `skills init <name>` — creates `<name>/SKILL.md` with starter frontmatter
 2. Replace the generated `SKILL.md` with real content
 3. Add any `references/` or supporting files
-4. Run `uv run python scripts/validate_skills.py` and the full suite above
+4. Run the validation commands and the full suite above
 5. Commit in small, reviewable steps

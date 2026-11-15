@@ -50,8 +50,9 @@ hooks = [
 repo = "local"
 hooks = [
   {
-    id = "agentskills-validate",
-    name = "Validate Agent Skills spec",
+    # The best-practices rules skill-validator lacks. Delete once agent-ecosystem/skill-validator#108 ships.
+    id = "skill-best-practices",
+    name = "Best-practices checks skill-validator lacks",
     language = "system",
     entry = "uv run python scripts/validate_skills.py",
     pass_filenames = false,
@@ -64,6 +65,33 @@ hooks = [
     name = "Type-check with ty",
     language = "system",
     entry = "uvx ty check .",
+    pass_filenames = false,
+    always_run = true,
+    stages = ["pre-push"],
+    priority = 1
+  },
+]
+
+# The Agent Skills spec. `check .` skips dot-directories, so the project skills get a run of their own.
+# It exits 2 on a warning, so a warning fails the push too.
+[[repos]]
+repo = "https://github.com/agent-ecosystem/skill-validator"
+rev = "v1.8.0"
+hooks = [
+  {
+    id = "skill-validator",
+    name = "skill-validator (published skills)",
+    args = ["check", ".", "--allow-dirs=evals"],
+    pass_filenames = false,
+    always_run = true,
+    stages = ["pre-push"],
+    priority = 1
+  },
+  {
+    id = "skill-validator",
+    alias = "skill-validator-project",
+    name = "skill-validator (project skills)",
+    args = ["check", ".agents/skills", "--allow-dirs=evals"],
     pass_filenames = false,
     always_run = true,
     stages = ["pre-push"],

@@ -107,15 +107,14 @@ Fix bucket 1 first, then bucket 2, then add bucket 3.
 - Correct wrong advice where it stands; do not append a "changes in vX" section that leaves the old text in place for an agent to follow.
 - Describe the latest release only (step 2a): remove any version notes and "new in vX" markers you find, rather than adding more.
 - Move every marker from step 1 to what you checked. Markers live in the skill's own files (`SKILL.md`, `references/`): a skill directory holds no README, since `skills add` copies everything in it into the install.
-- Stay inside the validator's budget: `SKILL.md` body ≤ 500 lines and ~5000 words. When a section grows, move the detail into `references/<topic>.md` and leave a one-line pointer, as `wise-mcp/references/scaling-large-catalogs.md` does.
+- Stay inside skill-validator's budget: `SKILL.md` body ≤ 500 lines and 5,000 tokens. When a section grows, move the detail into `references/<topic>.md` and leave a one-line pointer, as `wise-mcp/references/scaling-large-catalogs.md` does.
 - Keep the frontmatter `description` third-person with a "Use when" trigger; if the refresh changed what the skill covers, update it.
 - Update the root `README.md` skill list if the skill's one-line summary changed.
 
 ## 6. Validate
 
 ```bash
-uv run python scripts/validate_skills.py
-prek run --all-files --hook-stage pre-push agentskills-validate typos markdownlint ruff-check ruff-format ty
+prek run --all-files --hook-stage pre-push skill-validator skill-validator-project skill-best-practices typos markdownlint ruff-check ruff-format ty
 prek run --all-files --hook-stage pre-push lychee   # links; not run in CI, so run it here
 ```
 
