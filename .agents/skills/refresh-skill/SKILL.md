@@ -29,7 +29,7 @@ What each skill currently rests on:
 | `step-dev` | `exense/step` (tags `3.N.x` = docs `vN`, confirmed for 29–31); the Java Keyword API releases separately (`exense/step-api`) | **primary**: the `step.dev/knowledgebase` pages cited in `references/*.md`; "based on the vN documentation … last read on" in `SKILL.md`. No public docs source; `https://step.dev/knowledgebase/<N>/...` serves version N, for diffing against the last-read version | stateful vs stateless keyword guidance, the common-mistakes list |
 | `wise-mcp` | `PrefectHQ/fastmcp`; "Written against FastMCP X and MCP spec Y, the latest at the time of writing (date)" in `SKILL.md`. Names only the APIs its judgments rest on: the API itself is upstream's `fastmcp-server` skill | <https://gofastmcp.com> (unversioned pages are the current line); Arcade's catalog at <https://www.arcade.dev/patterns>, its count in `SKILL.md` and `references/sources.md` | **the whole skill**. Its premises are the table in `references/sources.md`: spec, client docs, measured studies, Arcade's catalog, each with a checked date. Re-read every row, then search for newer work (vendor engineering posts, benchmarked studies, the spec's newest revision) and add a row for anything that holds up, or a "searched and not adopted" note. Measurements outrank a practitioner's catalog |
 
-Read the skill's `git log` too: the last refresh commit says what was checked then and why, and is where this refresh picks up.
+Read the skill's `git log` too: the last refresh commit says what was checked then and why, and is where this refresh picks up. Then search the `agent-skills` Linear project for open issues naming the skill. A refresh often settles them without saying so: two wise-mcp issues sat in the backlog for months after the refresh that did their work, one of them resting on a FastMCP behaviour that had since changed. Close each one the refresh settles, saying what settled it, or fold it into the refresh.
 
 Every source a skill rests on needs a marker saying when it was last checked: a version for a release stream, a docs version plus the date read for docs, a "reviewed" date for judgments. If one is missing, adding it is part of this refresh — without it the next refresh cannot tell what is stale. Update the table above when a skill is added, retired, or what it rests on changes.
 
@@ -100,6 +100,12 @@ Test each bucket-1 and bucket-3 claim before it goes into the skill: run the ins
 
 Finding a name in the docs is not verification. Run the code. In a test refresh, an agent that grepped FastMCP's docs listed `require_auth` as "verified still true"; an agent that imported it found it exists in neither 3.4.11 nor 4.2.0. In the report, mark each claim as run or docs-only, so the reviewer knows which ones to trust.
 
+Run it the way an agent runs it, and run every path the skill prescribes:
+
+- **No terminal.** An agent's shell has no TTY, and tools behave differently there. git-spice does not hang on a missing branch name, as the old skill said: it fails with "not allowed to prompt for input". Run the scratch commands from the agent's own shell, not from yours.
+- **The recovery paths too.** Advice of the form "if you already did X, run Y" needs X then Y in the scratch repo. The git-spice refresh ran `repo sync --restack` on a fresh stack and passed, while the skill told agents to run it *after* a plain sync, when it restacks nothing. Devin Review caught it in the PR, from upstream's source.
+- **The coverage you drop advice for.** When you cut advice because upstream's help or skill now covers it, run upstream on the case first. When `scripts/validate_skills.py` was cut down to what skill-validator lacks, two checks went on that assumption, and skill-validator turned out to pass both cases.
+
 ## 5. Edit
 
 Fix bucket 1 first, then bucket 2, then add bucket 3.
@@ -122,6 +128,11 @@ Keep `--hook-stage pre-push`: these hooks are declared pre-push only, and withou
 
 They check format, not behaviour. For a refresh that rewrites advice, the behavioural check is `skill-creator`'s comparison loop: the refreshed skill against the pre-refresh one (it snapshots the old version), on prompts that hit the changed advice, such as "sync my stack after the base merged" for git-spice's `--restack` change. It costs two agent runs per prompt. Start from the skill's `evals/` when it has one (`wise-mcp/evals/` does): rerun those cases, then add a case for each piece of advice this refresh changed, and save the new cases back there. Do not skip it silently: put it in the review post as a decision, with the prompts you would use and the cost, and run it if the user says yes.
 
+Two things keep the comparison honest:
+
+- **Tell each run to read only the skill file you hand it, and to load no skill through the Skill tool.** An installed copy of the same skill, such as a global `git-spice`, would otherwise load into both runs and erase the difference you are measuring.
+- **Pick prompts where the old advice was wrong or silent.** A case both versions pass shows nothing: in the git-spice comparison, both committed the new file correctly, and only the sync and merge cases told the versions apart.
+
 ## 7. Commit
 
 One commit per skill, so each refresh can be reviewed and reverted on its own. Hand the changeset over for review in Tower before committing (the `tower-review` skill).
@@ -132,4 +143,4 @@ Body: lead with what an agent following the old skill got wrong and what happene
 
 ## Refreshing several skills
 
-Open one Linear issue in the `agent-skills` project with a checklist item per skill, tick items off as each commit lands, and put all the commits on one branch for a single PR — the shape of PR #13.
+Open a parent issue in the `agent-skills` Linear project with one sub-issue per skill, so each refresh shows on the board and its own commit closes it (`Closes DOT-nnn`). Put all the commits on one branch for a single PR, the shape of PR #16. A checklist inside an issue is only for steps within one commit.

@@ -56,8 +56,9 @@ Project skills that maintain this repo live in `.agents/skills/`; `.claude/skill
 
 Load the `skill-creator` skill before writing or substantially rewriting any skill here, project skills under `.agents/skills/` included. It asks the scoping questions up front and tests the skill against runs without it. The validator and prek only check format, so a skill that passes them can still change nothing an agent does.
 
-1. `skills init <name>` — creates `<name>/SKILL.md` with starter frontmatter
-2. Replace the generated `SKILL.md` with real content
-3. Add any `references/` or supporting files
-4. Run the validation commands and the full suite above
-5. Commit in small, reviewable steps
+1. Before writing a skill or publishing an internal one, search for an existing one: `skills find <topic>` with a few phrasings, plus a web search for skills outside the registry. Read the closest matches and check they are maintained. Write ours only when none fits, and say why in the commit. refresh-skill reached its publish step before anyone looked.
+2. `skills init <name>` — creates `<name>/SKILL.md` with starter frontmatter
+3. Replace the generated `SKILL.md` with real content
+4. Add any `references/` or supporting files
+5. Run the validation commands and the full suite above
+6. Commit in small, reviewable steps
