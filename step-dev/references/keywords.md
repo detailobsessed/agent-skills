@@ -6,7 +6,8 @@
 > - Keyword API: https://step.dev/knowledgebase/devdocs/keywordapi/
 > - Tutorials: https://step.dev/tutorials/basic-keyword-development/
 > - Java samples: https://github.com/exense/step-samples/tree/master/keywords/java
-> - JS samples: https://github.com/exense/step-node/tree/master/examples
+> - JS samples: https://github.com/exense/step/tree/master/step-node/examples (the old `exense/step-node` repo is archived)
+> - JavaScript, TypeScript and C# keyword pages: https://step.dev/knowledgebase/devdocs/keyword-javascript/, https://step.dev/knowledgebase/devdocs/keyword-typescript/, https://step.dev/knowledgebase/devdocs/keyword-csharp/
 > - .NET samples: https://github.com/exense/step-samples/tree/master/keywords/dotnet80
 
 ## Table of contents
@@ -57,15 +58,22 @@ The `@Keyword` annotation supports these attributes:
 - `name` — custom keyword name (defaults to method name)
 - `schema` — JSON schema for inputs
 - `description` — description shown in Step UI
-- `properties` — additional configuration properties
+- `properties`, `optionalProperties` — required and optional configuration properties
+- `routing` — agent routing criteria; `Keyword.ROUTING_EXECUTE_ON_CONTROLLER` runs it on the controller
+- `timeout` — in milliseconds, default 180000
+- `planReference` — the plan the keyword stands for
+
+Since Keyword API 1.6.0 (Step 30) the Java libraries are Java 21 bytecode: a project depending on `step-api-keyword` 1.6.0+ must compile with `--release 21` or later.
 
 ### .NET
 
-Extend `AbstractScript` and annotate with `[Keyword]`:
+Extend `AbstractKeyword` from `Step.Handlers.NetHandler` and annotate with `[Keyword]` (.NET 8, Enterprise and SaaS only). Keyword methods take no arguments and return `void`; hooks are the PascalCase overrides `BeforeKeyword`, `AfterKeyword` and `OnError`.
 
 ```csharp
+using Step.Handlers.NetHandler;
+
 namespace STEP {
-    public class Keywords : StepApi.AbstractScript {
+    public class Keywords : AbstractKeyword {
         [Keyword(name = "My Keyword")]
         public void MyKeyword() {
             // your implementation
@@ -79,24 +87,29 @@ namespace STEP {
 Export async functions from CommonJS `.js` files in the `keywords/` directory (configurable via `step.keywords` in `package.json`). The export name becomes the keyword name in Step.
 
 ```javascript
-exports.MyKeyword = async (input, output, session, properties) => {
+exports.MyKeyword = async (input, output, session, properties, liveReporting) => {
     const result = await doSomething(input['param'])
     output.add('result', result)
 }
 ```
 
-Each keyword receives four arguments:
+Each keyword receives five arguments; trailing ones can be left out:
 
 - **input** — input parameters from the Step plan, as a plain object
-- **output** — an `OutputBuilder` for return values, errors, and attachments
+- **output** — an `OutputBuilder` for return values, errors (`output.setError(msg)` or `output.fail(msg)`), and attachments. `output.send()` still works but is no longer needed.
 - **session** — a Map scoped to the token's lifetime for sharing state between keyword calls
 - **properties** — flat key/value map of agent and token properties configured in Step
+- **liveReporting** — streams measures, metrics and files while the keyword runs; safe to call without a controller (the calls are discarded)
+
+An attachment's `hexContent` must be **base64**, despite its name.
+
+The Node agent copies the project into a per-token workspace and installs dependencies with `npm ci` when a `package-lock.json` exists (a failing `npm ci` does not fall back), otherwise `npm install`; the log is attached as `npm-install.log`. For TypeScript, compile `src/` with `tsc` to `keywords/` as CommonJS, with `step-node-agent` (same version as Step) as a dev dependency.
 
 Three optional module-level hooks can be exported alongside keywords:
 
 - `beforeKeyword(functionName)` — called before each keyword execution
 - `afterKeyword(functionName)` — called after each keyword execution, even on failure
-- `onError(exception, input, output, session, properties)` — called on error; return `true` to propagate, `false` to suppress
+- `onError(exception, input, output, session, properties)` — called on error; return `true` to propagate, `false` to suppress. Suppressing only skips recording the exception: an error the hook or the keyword already set on `output` still fails the keyword
 
 ---
 
@@ -275,7 +288,7 @@ exports.onError = async (exception, input, output, session, properties) => {
 
 Use the session when keywords within a workflow need to share state — for example, storing authentication tokens, browser instances, or database connections.
 
-The session is only available when keyword calls are grouped using the `Session` control in a plan. Objects stored in the session must implement `Closeable` or `AutoCloseable` to be cleaned up when the session is released.
+The session is only available when keyword calls are grouped using the `Session` control in a plan. Objects stored in the session must implement `Closeable` or `AutoCloseable` to be cleaned up when the session is released. In JavaScript, objects with `[Symbol.dispose]`, `[Symbol.asyncDispose]`, `.close()` or `.kill()` are disposed.
 
 **Java**:
 
@@ -411,11 +424,16 @@ public void WorkflowAsCode() {
 
 ## Live reporting
 
-Live Reporting streams data (log files, measurements) in real time while the keyword runs, as opposed to returning them only after completion. Java API only. Both live and traditional reporting can be combined.
+Live Reporting streams data (log files, measurements) in real time while the keyword runs, as opposed to returning them only after completion. Supported by the Java API (`liveReporting` field of `AbstractKeyword`) and the JavaScript/Node.js API (the fifth keyword argument); not by .NET. Both live and traditional reporting can be combined.
 
-> Live Reporting is under active development and planned for finalization in Step 30. Fully supported on Step infrastructure; local execution support is limited.
+### Metrics (Keyword API 1.6.0, Step 30)
 
-See the Keyword API javadoc for streaming file upload and advanced features.
+`output.newCounter`, `newGauge` and `newHistogram(name[, labels])`, or `liveReporting.metrics.registerCounter/Gauge/Histogram`. Values are sampled every 5 s, with a final sample when the keyword ends.
+
+- Reserved label names are silently overwritten: `name`, `metricType`, `instrumentType`, `eId`, `planId`, `plan`, `canonicalPlanName`, `agentUrl`, `taskId`, `schedule`, `execution`, `origin`.
+- Label values count against cardinality quotas: never use UUIDs or timestamps as label values (or in a measurement's `data`).
+
+`stopMeasure` also takes an explicit `Measure.Status`. See the Keyword API javadoc for streaming file upload and advanced features.
 
 ---
 
@@ -443,7 +461,7 @@ Clean up all resources explicitly — browsers, WebDriver instances, database co
 ### Session usage
 
 - Use session properties sparingly to avoid memory overhead
-- Objects stored in session must implement `Closeable` or `AutoCloseable` if they need cleanup
+- Objects stored in session must implement `Closeable` or `AutoCloseable` (Java) or a disposal method (JS) if they need cleanup
 - Sessions are scoped to the `Session` control in a plan — not globally available
 
 ### Accessing Automation Package resources

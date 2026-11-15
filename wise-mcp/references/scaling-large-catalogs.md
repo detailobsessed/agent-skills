@@ -1,125 +1,56 @@
 # Scaling large tool catalogs
 
-Implementation detail for the three server-side mechanisms that keep a large tool catalog usable:
-search transforms, the manual visibility gateway, and Code Mode.
-
-**Read `SKILL.md` §9 first** — it covers when *not* to reach for any of this. Most clients defer
-tool loading themselves, so a server-side discovery layer often adds round-trips without saving
-context. These mechanisms earn their place on genuinely large catalogs (hundreds of tools),
-dynamic catalogs, gateways aggregating many backends, or clients you don't control.
+Which server-side mechanism to use once `SKILL.md` §9 says a catalog needs narrowing, and the traps in each. Read §9 first: clients that defer tool loading make all of this unnecessary for most servers. For the full API of each mechanism, use the `fastmcp-server` skill or the FastMCP transforms docs.
 
 ## Contents
 
-- [Search transforms (preferred)](#search-transforms-preferred)
-- [Visibility + gateway (manual alternative)](#visibility--gateway-manual-alternative)
+- [Choosing a mechanism](#choosing-a-mechanism)
+- [Search transforms](#search-transforms)
+- [Visibility gateway](#visibility-gateway)
 - [Code Mode](#code-mode)
 
-## Search transforms (preferred)
+## Choosing a mechanism
 
-Use `BM25SearchTransform` or `RegexSearchTransform` to replace `list_tools()` with a minimal
-interface. Pin the tools agents need immediately with `always_visible`; everything else is
-discoverable on demand.
+| Problem | Mechanism |
+| --- | --- |
+| The catalog is too big to list | a search transform, with the tools agents need at once pinned as always visible |
+| Agents should opt into whole categories | a visibility gateway, only if search doesn't fit |
+| Chained calls pass large intermediate results through the context | Code Mode |
 
-```python
-from fastmcp.server.transforms.search import BM25SearchTransform
+Prefer a search transform over a gateway. It doesn't depend on the client handling list-changed notifications, and hidden tools stay directly callable: the transform controls discovery, not access.
 
-# After mounting all sub-servers:
-mcp.add_transform(BM25SearchTransform(
-    max_results=8,
-    always_visible=["set_tenant", "search_plans", "run_plan", "wait_for_execution"],
-))
-# list_tools() now returns: always_visible tools + search_tools + call_tool
-```
+## Search transforms
 
-`search_tools` returns ranked results with full parameter schemas — the same JSON shape as
-`list_tools`, so the agent can construct a valid call without a second round-trip.
-`call_tool(name=..., arguments={...})` invokes any discovered tool. Hidden tools remain **directly
-callable** — the transform controls discovery, not access.
+`BM25SearchTransform` and `RegexSearchTransform` (`fastmcp.server.transforms.search`) replace the tool listing with `search_tools` and `call_tool`, plus whatever you pin with `always_visible`. Search results carry full parameter schemas, so the agent can call a found tool without another round-trip.
 
-The query parameter differs by strategy:
+- **BM25** ranks by relevance (`search_tools(query=...)`). Use it when agents describe what they want in words.
+- **Regex** matches a pattern (`search_tools(pattern=...)`) at almost no cost. Use it when agents roughly know the name. Patterns are bounded in length and run time, and lookarounds and backreferences are unsupported: a pattern using them returns no matches rather than an error, so don't suggest one in a description.
+- Both search tool names, descriptions, parameter names and parameter descriptions, so a good description and parameter names are what make a tool findable.
+- **Pin what agents need first** with `always_visible`: the tenant or project selector, the most common query, anything a workflow starts from. A client that ignores search still gets a usable floor.
 
-| Transform | Parameter | Matching |
-| --- | --- | --- |
-| `BM25SearchTransform` | `search_tools(query=...)` | Relevance-ranked; builds an index |
-| `RegexSearchTransform` | `search_tools(pattern=...)` | Case-insensitive `re.search`; zero overhead |
+## Visibility gateway
 
-Regex is the cheaper default when the agent roughly knows what it's looking for. Both search across
-tool names, descriptions, parameter names, and parameter descriptions — so a search for `"email"`
-matches a tool named `send_email`, one with "email" in its description, *and* one with an
-`email_address` parameter.
-
-This approach is client-safe: `always_visible` tools are always in `list_tools` regardless of
-whether the client supports `ToolListChangedNotification`.
-
-## Visibility + gateway (manual alternative)
-
-For cases where you need category-based opt-in rather than search:
+For category-based opt-in: hide every tool, re-show a small gateway (`get_capabilities`, `enable_tools(category)`), and enable categories on request.
 
 ```python
 from fastmcp.server.transforms import Visibility
 
-@server.tool(tags={"gateway"})
-def get_capabilities() -> dict: ...          # always visible
-
-@server.tool(tags={"gateway"})
-async def enable_tools(category: str, ctx: Context) -> dict: ...  # always visible
-
-@server.tool(tags={"plans"})
-def search_plans(...) -> dict: ...           # hidden until activated
-
-# Hide all tools, then re-show gateway
 mcp.add_transform(Visibility(False, components={"tool"}))
 mcp.add_transform(Visibility(True, tags={"gateway"}, components={"tool"}))
 ```
 
-**Caution:** `match_all=True` short-circuits the `components` filter — always use two separate
-transforms as shown, not a single `Visibility(False, match_all=True, components={"tool"})`.
-
-**Client compatibility note:** `ToolListChangedNotification` (sent after `enable_components()`) is
-optional and many clients don't implement it. If you can't guarantee client support, return
-activated tool schemas directly from `enable_tools()` so agents have immediate usability without
-waiting for a tool list refresh. This is the main reason to prefer the search transform approach —
-`always_visible` avoids the problem entirely.
+- **It needs authentication over HTTP.** `ctx.enable_components()` stores its rules per client, and an unauthenticated 2026-07-28 HTTP request has no client to key them to, so the call raises. Without auth, use a search transform.
+- **Use two transforms, as above.** `match_all=True` short-circuits the `components` filter, so a single `Visibility(False, match_all=True, components={"tool"})` hides every resource and prompt as well.
+- **Don't count on the client refreshing its list.** Many clients ignore the list-changed notification sent after enabling tools, so return the newly enabled tools' schemas from `enable_tools()` itself. This is the main reason search transforms are the better default.
 
 ## Code Mode
 
-Search transforms fix one scaling problem: the catalog is too big to send. They don't fix the
-other: **every intermediate result flows back through the context window.** An agent that calls
-five tools in sequence pays for four results it only needed in order to compute the fifth.
+Search fixes a catalog too big to send. It doesn't fix the other cost: every intermediate result flows back through the context. An agent calling five tools in sequence pays for four results it needed only to compute the fifth.
 
-`CodeMode` addresses both. The agent gets meta-tools instead of your catalog, discovers what it
-needs, then writes Python that chains tool calls **inside a sandbox** and returns only the final
-answer. Introduced by Cloudflare and explored in Anthropic's *Code Execution with MCP*.
+`CodeMode` (`fastmcp.experimental.transforms.code_mode`, installed with the `code-mode` extra) gives the agent `search`, `get_schema` and `execute` instead of your catalog. The agent writes Python that chains tool calls inside a sandbox and returns only the final answer. Your tools don't change. The approach comes from Cloudflare and Anthropic's *Code Execution with MCP*.
 
-```python
-from fastmcp import FastMCP
-from fastmcp.experimental.transforms.code_mode import CodeMode
-
-mcp = FastMCP("Server", transforms=[CodeMode()])
-
-@mcp.tool
-def add(x: int, y: int) -> int:
-    """Add two numbers."""
-    return x + y
-```
-
-Your tool functions don't change — the transform wraps existing tools. Install with the extra:
-`pip install "fastmcp[code-mode]"`.
-
-### Discovery flow
-
-Default discovery is three meta-tools — `search`, `get_schema`, `execute`. The trade is **tokens
-against round-trips**: each discovery step is an LLM round-trip, so more steps mean tighter context
-but more latency and API calls. Fewer steps hand the model information upfront and pay for detail it
-may not need. Tune the flow if that balance is wrong for your workload.
-
-### Caveats
-
-- **Experimental** — the core interface is stable, but the discovery tools and their parameters may
-  change. Note the `fastmcp.experimental` import path.
-- **Sandbox limits are on by default since 3.4.0** — `MontySandboxProvider()` applies 30s duration
-  and 100 MB memory when constructed without limits, and `CodeMode` caps tool calls at 50 per
-  `execute` block. Both are opt-out (`limits=None`, `max_tool_calls=None`). Don't disable them
-  casually: they are the blast-radius control for agent-authored code.
-- Reach for Code Mode when workflows chain several calls or move large intermediate payloads. For a
-  server whose tools are called one at a time, it adds machinery for no gain.
+- **Use it when workflows chain several calls or move large intermediate payloads.** For tools called one at a time it adds machinery for no gain.
+- **Each discovery step is a model round-trip.** Fewer steps hand the model more up front; more steps keep context tighter but add latency. Tune the flow if the balance is wrong for your workload.
+- **Say what the sandbox keeps.** Agents need to know what persists between `execute` calls and what becomes the result. A short fetch-filter-return example in the server instructions prevents repeated empty outputs.
+- **Keep the limits on.** The Monty sandbox applies duration and memory limits by default, and `CodeMode` caps tool calls per `execute`. They are the blast-radius control for agent-written code. When you set your own, use the limit names from the installed `pydantic-monty`: an unknown key passes construction and fails only at the first `execute`.
+- **It is experimental**, as the import path says. Its discovery tools and parameters may change between releases.

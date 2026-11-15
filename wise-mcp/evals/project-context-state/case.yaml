@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: project-context-state
+expected_outcome: |
+  The server keeps the chosen project across calls without storing it on the connection: a returned handle the agent passes back, or state keyed to the authenticated user, and the answer says why connection state does not persist.
+context:
+  scaffold_script: place-files.sh

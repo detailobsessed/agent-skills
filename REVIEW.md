@@ -12,7 +12,7 @@ This repo is a collection of agent skills: Markdown instructions that agents fol
 
 ## Skill content
 
-- **Version-specific claims name their version.** A skill's baseline marker (`SKILL.md`, and `README.md` where it has one) must match the version the rest of the text describes. Flag a commit that changes advice for a new release without moving the marker, or moves the marker without the advice.
+- **A skill describes one version, the latest at the time of writing.** Its baseline line (`SKILL.md`, and `README.md` where it has one) names that version, and the rest of the text must match it. Flag a commit that changes advice for a new release without moving the baseline, or moves the baseline without the advice. Also flag added migration notes, "new in vX" / "removed in vY" markers, or a reference for an older release line: they age badly, and older releases have upstream's versioned docs.
 - **Commands and APIs a skill tells agents to use must exist.** Flag a command, flag, config key or API named in a changed section that looks invented or removed upstream, especially one not seen elsewhere in the skill.
 - **Corrections replace the old text.** A "changes in vX" section appended after advice it contradicts leaves the old advice for an agent to follow. Flag it.
 - **Frontmatter:** `name` matches the directory, and `description` is third person with a "Use when" trigger. `scripts/validate_skills.py` enforces the size budget (body ≤ 500 lines, ~5000 words), so don't re-report a size problem it already catches.

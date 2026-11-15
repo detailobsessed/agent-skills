@@ -26,8 +26,8 @@ What each skill currently rests on:
 | Skill | Release stream | Docs | Our judgments |
 | --- | --- | --- | --- |
 | `git-spice` | `abhinav/git-spice`; baseline `> This skill is written against **git-spice vX**` in `SKILL.md`, `Written against` in `README.md` | `git-spice -h` and <https://abhinav.github.io/git-spice/> | staging rules, the daily workflow |
-| `step-dev` | `exense/step` (tags `3.N.x`; how they map to the docs' `vN` is unconfirmed) | **primary**: the `step.dev/knowledgebase` pages cited in `references/*.md`; "based on the vN documentation" in `SKILL.md` | stateful vs stateless keyword guidance, the common-mistakes list |
-| `wise-mcp` | `PrefectHQ/fastmcp`; `> **Version baseline: FastMCP X.**` in `SKILL.md` | <https://gofastmcp.com> (documents the newest line, not necessarily the baseline); Arcade's catalog at <https://www.arcade.dev/patterns>, its count in `README.md`'s badge | **most of the skill**: guiding principles, tool design, when progressive disclosure pays, the anti-patterns. Premises live in the MCP spec's changelog (`https://modelcontextprotocol.io/specification/<revision>/changelog`) and the main clients' docs |
+| `step-dev` | `exense/step` (tags `3.N.x` = docs `vN`, confirmed for 29–31); the Java Keyword API releases separately (`exense/step-api`) | **primary**: the `step.dev/knowledgebase` pages cited in `references/*.md`; "based on the vN documentation … last read on" in `SKILL.md`. No public docs source; `https://step.dev/knowledgebase/<N>/...` serves version N, for diffing against the last-read version | stateful vs stateless keyword guidance, the common-mistakes list |
+| `wise-mcp` | `PrefectHQ/fastmcp`; "Written against FastMCP X and MCP spec Y, the latest at the time of writing (date)" in `SKILL.md`, "Written against" in `README.md`. Names only the APIs its judgments rest on: the API itself is upstream's `fastmcp-server` skill | <https://gofastmcp.com> (unversioned pages are the current line); Arcade's catalog at <https://www.arcade.dev/patterns>, its count in `README.md`'s badge and `SKILL.md` | **the whole skill**. Its premises are the **Sources** table in `README.md`: spec, client docs, measured studies, Arcade's catalog, each with a checked date. Re-read every row, then search for newer work (vendor engineering posts, benchmarked studies, the spec's newest revision) and add a row for anything that holds up, or a "searched and not adopted" note. Measurements outrank a practitioner's catalog |
 
 Read the skill's `git log` too: the last refresh commit says what was checked then and why, and is where this refresh picks up.
 
@@ -55,7 +55,7 @@ gh release view -R "$repo" <tag> --json body --jq .body   # per tag, oldest firs
 
 Where upstream keeps a `CHANGELOG.md` or a `.changes/` directory instead, read that.
 
-When a new major line appears, decide which line the skill describes, and say so in the baseline marker. While the major is a prerelease, keep the stable line and describe the new one in a `references/` file (FastMCP 4 during the 3.4.5 refresh). Once it is stable, the default is to move the baseline to it and keep the old line's differences in a reference for users still on it.
+A skill describes one version: the latest stable release at the time of writing, named once in the baseline line. Move it there, across a new major line too, and leave a prerelease alone until it is stable. Write no migration notes, no "new in vX" or "removed in vY" markers, and no reference for users on an older line: they age badly, and an agent on an old release has upstream's versioned docs. What a release breaks matters only for finding the advice to rewrite.
 
 ### 2b. Docs
 
@@ -72,8 +72,9 @@ Release notes and docs never say that our own advice went stale. Do this pass de
 
 1. List the skill's judgments — the advice that is ours, not a restatement of upstream docs (principles, "prefer X over Y", thresholds, anti-patterns).
 2. For each, write down the premise it rests on. `wise-mcp`'s old "add progressive disclosure at 10+ tools" rested on "clients load every tool schema up front".
-3. Check whether the premise still holds: the MCP spec's changelog, how the main clients behave now (their docs and release notes), the source catalog the judgment cites (Arcade), and what well-regarded current practice says.
+3. Check whether the premise still holds: the MCP spec's changelog, how the main clients behave now (their docs and release notes), the sources the skill lists, and what well-regarded current practice says. A skill's source list is where to start, not where to stop: search past it for newer measured work, because a catalog that was the best available when the skill was written can be overtaken without changing a word (`wise-mcp` leaned on Arcade alone until 2026-11-15).
 4. A premise that no longer holds puts the judgment in bucket 2. Rewrite it from the new premise, and say in the commit what changed underneath it — `05f6dc3` is the model.
+5. Keep the skill's source list current: add what you used, record what you searched and rejected, and date every row.
 
 ## 3. Check whether the skill should still exist
 
@@ -91,6 +92,8 @@ Upstreams publish their own skills now (gofastmcp.com ships `fastmcp-server`), s
 
 `b47f466` (macos-expert → Axiom) is the worked example.
 
+When an upstream skill covers only part of ours, usually the API, narrow ours to what it doesn't cover instead of retiring it. Drop what theirs says, point to it, and keep our own judgment. Don't take on the upstream author's personal setup or conventions along the way. `wise-mcp` against gofastmcp.com's `fastmcp-server` is the example: theirs routes to the API docs, ours keeps the design advice.
+
 ## 4. Verify before writing
 
 Test each bucket-1 and bucket-3 claim before it goes into the skill: run the installed tool's `-h`, run the command in a scratch repo, install the new library version in a throwaway project (`uv init` in the scratchpad, `uv add <pkg>==<version>`), read the source where the notes are vague. A release note says what changed; it rarely says what it means for a user who followed the old advice. That consequence is what the skill has to say.
@@ -102,9 +105,9 @@ Finding a name in the docs is not verification. Run the code. In a test refresh,
 Fix bucket 1 first, then bucket 2, then add bucket 3.
 
 - Correct wrong advice where it stands; do not append a "changes in vX" section that leaves the old text in place for an agent to follow.
-- Keep a version note inline only where behaviour differs between releases a user might still run (git-spice's "v0.28.0+" fork-mode note). Drop stale "new in vX" markers for releases everyone is past.
+- Describe the latest release only (step 2a): remove any version notes and "new in vX" markers you find, rather than adding more.
 - Move every marker from step 1 to what you checked, in `SKILL.md` and the skill's `README.md`.
-- Stay inside the validator's budget: `SKILL.md` body ≤ 500 lines and ~5000 words. When a section grows, move the detail into `references/<topic>.md` and leave a one-line pointer, as `wise-mcp/references/fastmcp-4.md` does.
+- Stay inside the validator's budget: `SKILL.md` body ≤ 500 lines and ~5000 words. When a section grows, move the detail into `references/<topic>.md` and leave a one-line pointer, as `wise-mcp/references/scaling-large-catalogs.md` does.
 - Keep the frontmatter `description` third-person with a "Use when" trigger; if the refresh changed what the skill covers, update it.
 - Update the root `README.md` skill list if the skill's one-line summary changed.
 
@@ -118,7 +121,7 @@ prek run --all-files --hook-stage pre-push lychee   # links; not run in CI, so r
 
 Keep `--hook-stage pre-push`: these hooks are declared pre-push only, and without the flag `prek` runs none of them, prints nothing and exits 0. Each hook must print `Passed`; an empty output is a check that did not happen. All three must pass before the changeset goes to review. A lychee failure in a skill you did not touch is still worth a line in the report, not a fix in this commit. `typos` rewriting a CLI literal is a known trap: add the literal to `_typos.toml` rather than accepting the rewrite.
 
-They check format, not behaviour. For a refresh that rewrites advice, the behavioural check is `skill-creator`'s comparison loop: the refreshed skill against the pre-refresh one (it snapshots the old version), on prompts that hit the changed advice, such as "sync my stack after the base merged" for git-spice's `--restack` change. It costs two agent runs per prompt. Do not skip it silently: put it in the review post as a decision, with the prompts you would use and the cost, and run it if the user says yes.
+They check format, not behaviour. For a refresh that rewrites advice, the behavioural check is `skill-creator`'s comparison loop: the refreshed skill against the pre-refresh one (it snapshots the old version), on prompts that hit the changed advice, such as "sync my stack after the base merged" for git-spice's `--restack` change. It costs two agent runs per prompt. Start from the skill's `evals/` when it has one (`wise-mcp/evals/` does): rerun those cases, then add a case for each piece of advice this refresh changed, and save the new cases back there. Do not skip it silently: put it in the review post as a decision, with the prompts you would use and the cost, and run it if the user says yes.
 
 ## 7. Commit
 
