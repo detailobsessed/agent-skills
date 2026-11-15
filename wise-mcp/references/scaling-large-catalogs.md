@@ -39,6 +39,7 @@ mcp.add_transform(Visibility(False, components={"tool"}))
 mcp.add_transform(Visibility(True, tags={"gateway"}, components={"tool"}))
 ```
 
+- **It needs authentication over HTTP.** `ctx.enable_components()` stores its rules per client, and an unauthenticated 2026-07-28 HTTP request has no client to key them to, so the call raises. Without auth, use a search transform.
 - **Use two transforms, as above.** `match_all=True` short-circuits the `components` filter, so a single `Visibility(False, match_all=True, components={"tool"})` hides every resource and prompt as well.
 - **Don't count on the client refreshing its list.** Many clients ignore the list-changed notification sent after enabling tools, so return the newly enabled tools' schemas from `enable_tools()` itself. This is the main reason search transforms are the better default.
 
