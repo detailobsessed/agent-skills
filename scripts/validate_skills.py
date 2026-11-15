@@ -30,7 +30,8 @@ MAX_DESCRIPTION_LEN = 1024  # spec MUST
 MAX_NAME_LEN = 64  # spec MUST
 MAX_COMPATIBILITY_LEN = 500  # spec MUST when present
 REFERENCE_TOC_THRESHOLD_LINES = 100  # best-practices: TOC recommended past this
-KNOWN_SUBDIRS = {"references", "scripts", "assets"}  # spec-named optional dirs
+KNOWN_SUBDIRS = {"references", "scripts", "assets", "evals"}  # spec dirs + skill-creator's evals/
+PROJECT_SKILLS_DIR = REPO_ROOT / ".agents" / "skills"  # repo-maintenance skills, marked internal
 NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 RESERVED_NAME_WORDS = {"anthropic", "claude"}  # best-practices: "reserved words"
 # A description that opens in first/second person fails the third-person rule.
@@ -93,7 +94,7 @@ def _read_properties(skill_dir: Path) -> dict[str, object] | None:
     have a baseline failure from `agentskills validate`)."""
     try:
         result = subprocess.run(
-            ["uv", "run", "agentskills", "read-properties", skill_dir.name],
+            ["uv", "run", "agentskills", "read-properties", str(skill_dir.relative_to(REPO_ROOT))],
             cwd=REPO_ROOT,
             capture_output=True,
             text=True,
@@ -118,7 +119,7 @@ def check_baseline(skill_dir: Path) -> list[Finding]:
     """
     try:
         result = subprocess.run(
-            ["uv", "run", "agentskills", "validate", skill_dir.name],
+            ["uv", "run", "agentskills", "validate", str(skill_dir.relative_to(REPO_ROOT))],
             cwd=REPO_ROOT,
             capture_output=True,
             text=True,
@@ -423,12 +424,18 @@ def check_reserved_words_in_name(skill_dir: Path, props: dict[str, object]) -> l
 # --- runner -------------------------------------------------------------------
 
 
+def _is_skill(path: Path) -> bool:
+    return path.is_dir() and not path.name.startswith(".") and (path / "SKILL.md").is_file()
+
+
 def get_skill_directories() -> list[Path]:
-    skills = sorted(
-        path
-        for path in REPO_ROOT.iterdir()
-        if path.is_dir() and not path.name.startswith(".") and (path / "SKILL.md").is_file()
+    """Published skills at the repo root, then the project skills in `.agents/skills/`."""
+    project = (
+        sorted(filter(_is_skill, PROJECT_SKILLS_DIR.iterdir()))
+        if PROJECT_SKILLS_DIR.is_dir()
+        else []
     )
+    skills = [*sorted(filter(_is_skill, REPO_ROOT.iterdir())), *project]
     if not skills:
         raise SystemExit("No skill directories with SKILL.md were found.")
     return skills

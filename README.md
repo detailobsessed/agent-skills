@@ -82,6 +82,10 @@ Building MCP servers with [FastMCP](https://github.com/PrefectHQ/fastmcp), infor
 
 - **`macos-expert`** — removed 2026-08-06. [Axiom](https://github.com/CharlesWiltgen/Axiom)'s `axiom-macos` skill now covers the same ground (windows, menus, sandboxing, AppKit interop and modernization, distribution) and tracks macOS 26/27, where this skill stopped at macOS 15. Use Axiom instead. Recoverable from git history if the Shape A/B architectural triage is ever worth extracting on its own.
 
+## Updating a skill
+
+Refreshing a skill against a new upstream release, or retiring it, follows the repo-local project skill [`refresh-skill`](.agents/skills/refresh-skill/SKILL.md). It is marked `internal`, so `skills add` does not offer it with the other skills.
+
 ## Adding a new skill
 
 The preferred workflow here is:
@@ -101,6 +105,9 @@ The preferred workflow here is:
     ```bash path=null start=null
     uv run python scripts/validate_skills.py
     prek run --all-files
+    prek run --all-files --hook-stage pre-push
     ```
+
+    The second run is the one that matters: typos, markdownlint, ruff, ty, the validator and lychee are pre-push hooks, and `prek run` without `--hook-stage pre-push` skips them silently.
 
 5. Commit the change in small, reviewable steps
