@@ -120,7 +120,7 @@ Fix bucket 1 first, then bucket 2, then add bucket 3.
 ## 6. Validate
 
 ```bash
-prek run --all-files --hook-stage pre-push skill-validator skill-validator-project skill-best-practices typos markdownlint ruff-check ruff-format ty
+prek run --all-files --hook-stage pre-push skill-validator skill-validator-project skill-best-practices typos markdownlint kacl-verify ruff-check ruff-format ty
 prek run --all-files --hook-stage pre-push lychee   # links; not run in CI, so run it here
 ```
 

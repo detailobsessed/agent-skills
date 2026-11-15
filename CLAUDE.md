@@ -17,9 +17,9 @@ uv sync --locked --group dev
 skill-validator check . --allow-dirs=evals && skill-validator check .agents/skills --allow-dirs=evals
 uv run python scripts/validate_skills.py
 
-# Run all pre-push checks (validation + typos + markdown lint + python lint/type), the same list CI runs.
+# Run all pre-push checks (validation + typos + markdown lint + changelog format + python lint/type), the same list CI runs.
 # --hook-stage pre-push is required: these hooks are pre-push only, and without it prek runs nothing and exits 0.
-prek run --all-files --hook-stage pre-push skill-validator skill-validator-project skill-best-practices typos markdownlint ruff-check ruff-format ty
+prek run --all-files --hook-stage pre-push skill-validator skill-validator-project skill-best-practices typos markdownlint kacl-verify ruff-check ruff-format ty
 
 # Run the full suite: pre-commit builtins, then every pre-push hook including lychee link checking
 prek run --all-files && prek run --all-files --hook-stage pre-push
@@ -40,7 +40,7 @@ This repo uses `prek` (Rust-based git hook framework). `prek install` installs o
 
 ## CI
 
-GitHub Actions runs on PR and push to main: syncs deps, then runs `prek` with `skill-validator skill-validator-project skill-best-practices typos markdownlint ruff-check ruff-format ty`. The `lychee` link checker is configured in `prek.toml` but not run in CI.
+GitHub Actions runs on PR and push to main: syncs deps, then runs `prek` with `skill-validator skill-validator-project skill-best-practices typos markdownlint kacl-verify ruff-check ruff-format ty`. The `lychee` link checker is configured in `prek.toml` but not run in CI.
 
 ## PRs or main
 
