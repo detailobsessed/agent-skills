@@ -1,6 +1,7 @@
 ---
 name: git-spice
 description: Use git-spice to manage stacked branches and pull/merge requests on GitHub, GitLab, Bitbucket, Gitea, Forgejo, or Codeberg. Covers setup, daily workflow, staging rules, submitting, amending, merging, and syncing stacks. Invoke when working with stacked PRs/MRs or whenever the user mentions gs, git-spice, or stacked branches.
+license: MIT
 ---
 
 # git-spice

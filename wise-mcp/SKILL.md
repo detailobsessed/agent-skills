@@ -1,6 +1,7 @@
 ---
 name: wise-mcp
 description: Design judgment for MCP servers built with FastMCP — what makes tools, outputs, errors, state, auth and large catalogs work for the agent calling them, drawn from Arcade's agentic tool patterns and the current MCP spec. Use when building, wrapping, reviewing or refactoring an MCP server, tool, resource or prompt, when deciding tool boundaries, descriptions, response shape or error design, when a server needs cross-call state, user confirmation or per-tool auth, or when a tool catalog is getting large. Pairs with FastMCP's own `fastmcp-server` skill, which covers the API.
+license: MIT
 ---
 
 # Designing MCP servers that agents use well
@@ -10,7 +11,7 @@ This skill is the design half of building an MCP server: what to build and why. 
 - **FastMCP API** — the `fastmcp-server` skill from gofastmcp.com, if installed. Otherwise read the index at <https://gofastmcp.com/llms.txt> and fetch the pages you need as `.md`; don't load `llms-full.txt`, which runs to megabytes. Check the project's installed FastMCP version first: unversioned pages describe the current line, `/v3/` pages the 3.x line.
 - **Arcade's pattern catalog** — 54 patterns for agent-facing tools at <https://www.arcade.dev/patterns>, plain text at <https://www.arcade.dev/patterns/llm.txt>. The `(see: NAME)` tags below are its pattern names. It is a practitioner's catalog, not a measured one. Anthropic's [Writing effective tools for agents](https://www.anthropic.com/engineering/writing-tools-for-agents) independently supports its core (consolidated tools, natural identifiers, concise responses, actionable errors), and where measurements disagree, this skill follows the measurements.
 
-Written against FastMCP 4.2.0 and MCP spec 2026-07-28, the latest at the time of writing (2026-11-15). Where an API named here disagrees with the installed version, the installed version wins; the judgment usually still holds.
+Written against FastMCP 4.2.0 and MCP spec 2026-07-28, the latest at the time of writing (2026-11-15). Where an API named here disagrees with the installed version, the installed version wins; the judgment usually still holds. Every source the advice rests on, with the date it was last checked, is in [references/sources.md](references/sources.md).
 
 ## 1. Guiding principles
 

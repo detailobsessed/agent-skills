@@ -66,17 +66,31 @@ If `pre-commit` gets replaced by a future explicit `prek install --hook-type pre
 
 ## Skills
 
+Each skill directory holds only what an agent reads: `skills add` copies the whole directory into every install. Notes for people browsing the repo live here instead. All skills are MIT-licensed ([LICENSE](LICENSE)).
+
 ### `git-spice`
 
-Working effectively with [git-spice](https://abhinav.github.io/git-spice/) for stacked branches and pull/merge requests on GitHub, GitLab, Bitbucket, Gitea, Forgejo, and Codeberg.
+Working effectively with [git-spice](https://abhinav.github.io/git-spice/) for stacked branches and pull/merge requests on GitHub, GitLab, Bitbucket, Gitea, Forgejo, and Codeberg: setup, staging rules, the daily workflow, submitting, amending, merging and syncing a stack.
+
+```bash
+npx skills add https://github.com/detailobsessed/agent-skills --skill git-spice
+```
 
 ### `step-dev`
 
 Developing on the [Step](https://step.dev) unified automation platform — keyword development, the Keyword API, Automation Packages, and the CLI/CI-CD deployment path.
 
+```bash
+npx skills add https://github.com/detailobsessed/agent-skills --skill step-dev
+```
+
 ### `wise-mcp`
 
-Design judgment for MCP servers built with [FastMCP](https://github.com/PrefectHQ/fastmcp), drawn from the MCP spec, client docs, measured studies and practitioner catalogs listed in [its README](wise-mcp/README.md#sources). Pairs with FastMCP's own `fastmcp-server` skill for the API.
+Design judgment for MCP servers built with [FastMCP](https://github.com/PrefectHQ/fastmcp): what makes tools, outputs, errors, state and auth work for the agent calling them. Drawn from the MCP spec, client docs, measured studies and practitioner catalogs, each listed with the date it was last checked in [`references/sources.md`](wise-mcp/references/sources.md). Pairs with FastMCP's own `fastmcp-server` skill for the API.
+
+```bash
+npx skills add https://github.com/detailobsessed/agent-skills --skill wise-mcp
+```
 
 ### Retired
 

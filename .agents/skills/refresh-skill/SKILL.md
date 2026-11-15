@@ -25,9 +25,9 @@ What each skill currently rests on:
 
 | Skill | Release stream | Docs | Our judgments |
 | --- | --- | --- | --- |
-| `git-spice` | `abhinav/git-spice`; baseline `> This skill is written against **git-spice vX**` in `SKILL.md`, `Written against` in `README.md` | `git-spice -h` and <https://abhinav.github.io/git-spice/> | staging rules, the daily workflow |
+| `git-spice` | `abhinav/git-spice`; baseline `> This skill is written against **git-spice vX**` in `SKILL.md` | `git-spice -h` and <https://abhinav.github.io/git-spice/> | staging rules, the daily workflow |
 | `step-dev` | `exense/step` (tags `3.N.x` = docs `vN`, confirmed for 29–31); the Java Keyword API releases separately (`exense/step-api`) | **primary**: the `step.dev/knowledgebase` pages cited in `references/*.md`; "based on the vN documentation … last read on" in `SKILL.md`. No public docs source; `https://step.dev/knowledgebase/<N>/...` serves version N, for diffing against the last-read version | stateful vs stateless keyword guidance, the common-mistakes list |
-| `wise-mcp` | `PrefectHQ/fastmcp`; "Written against FastMCP X and MCP spec Y, the latest at the time of writing (date)" in `SKILL.md`, "Written against" in `README.md`. Names only the APIs its judgments rest on: the API itself is upstream's `fastmcp-server` skill | <https://gofastmcp.com> (unversioned pages are the current line); Arcade's catalog at <https://www.arcade.dev/patterns>, its count in `README.md`'s badge and `SKILL.md` | **the whole skill**. Its premises are the **Sources** table in `README.md`: spec, client docs, measured studies, Arcade's catalog, each with a checked date. Re-read every row, then search for newer work (vendor engineering posts, benchmarked studies, the spec's newest revision) and add a row for anything that holds up, or a "searched and not adopted" note. Measurements outrank a practitioner's catalog |
+| `wise-mcp` | `PrefectHQ/fastmcp`; "Written against FastMCP X and MCP spec Y, the latest at the time of writing (date)" in `SKILL.md`. Names only the APIs its judgments rest on: the API itself is upstream's `fastmcp-server` skill | <https://gofastmcp.com> (unversioned pages are the current line); Arcade's catalog at <https://www.arcade.dev/patterns>, its count in `SKILL.md` and `references/sources.md` | **the whole skill**. Its premises are the table in `references/sources.md`: spec, client docs, measured studies, Arcade's catalog, each with a checked date. Re-read every row, then search for newer work (vendor engineering posts, benchmarked studies, the spec's newest revision) and add a row for anything that holds up, or a "searched and not adopted" note. Measurements outrank a practitioner's catalog |
 
 Read the skill's `git log` too: the last refresh commit says what was checked then and why, and is where this refresh picks up.
 
@@ -106,7 +106,7 @@ Fix bucket 1 first, then bucket 2, then add bucket 3.
 
 - Correct wrong advice where it stands; do not append a "changes in vX" section that leaves the old text in place for an agent to follow.
 - Describe the latest release only (step 2a): remove any version notes and "new in vX" markers you find, rather than adding more.
-- Move every marker from step 1 to what you checked, in `SKILL.md` and the skill's `README.md`.
+- Move every marker from step 1 to what you checked. Markers live in the skill's own files (`SKILL.md`, `references/`): a skill directory holds no README, since `skills add` copies everything in it into the install.
 - Stay inside the validator's budget: `SKILL.md` body ≤ 500 lines and ~5000 words. When a section grows, move the detail into `references/<topic>.md` and leave a one-line pointer, as `wise-mcp/references/scaling-large-catalogs.md` does.
 - Keep the frontmatter `description` third-person with a "Use when" trigger; if the refresh changed what the skill covers, update it.
 - Update the root `README.md` skill list if the skill's one-line summary changed.
