@@ -148,6 +148,7 @@ Agents can't debug; they can only retry or try something else. The error message
 ```python
 from fastmcp.tools import ToolResult
 
+
 @mcp.tool
 def lookup(id: str) -> ToolResult:
     if not found(id):
