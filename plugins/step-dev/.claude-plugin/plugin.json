@@ -1,0 +1,10 @@
+{
+  "name": "step-dev",
+  "description": "Developer guide for the Step automation platform: writing keywords, packaging them with plans as Automation Packages, and running them.",
+  "author": {
+    "name": "detailobsessed"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/detailobsessed/agent-skills",
+  "homepage": "https://github.com/detailobsessed/agent-skills"
+}

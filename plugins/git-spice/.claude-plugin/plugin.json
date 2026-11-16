@@ -1,0 +1,10 @@
+{
+  "name": "git-spice",
+  "description": "Drives git-spice, the stacked-branch CLI, from an agent without the traps its built-in help does not warn about.",
+  "author": {
+    "name": "detailobsessed"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/detailobsessed/agent-skills",
+  "homepage": "https://github.com/detailobsessed/agent-skills"
+}

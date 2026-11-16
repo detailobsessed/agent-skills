@@ -1,6 +1,6 @@
 # Maintaining the skills in this repo
 
-The method for refreshing a skill is the published [`refresh-skill`](../refresh-skill/SKILL.md) skill. This page holds what it leaves to each repo: what each of our skills rests on, how we validate and commit, and the past refreshes worth copying.
+The method for refreshing a skill is the published [`refresh-skill`](../plugins/refresh-skill/skills/refresh-skill/SKILL.md) skill. This page holds what it leaves to each repo: what each of our skills rests on, how we validate and commit, and the past refreshes worth copying.
 
 ## What each skill rests on
 
@@ -32,7 +32,7 @@ Update this table when a skill is added, retired, or what it rests on changes.
   Run it from a folder that has an empty `.claude/` (it takes the nearest `.claude/` above the working directory as the project), with `PYTHONPATH` pointing at the copy. Before the full loop, run `run_eval` on four should-trigger queries with `--num-workers 4` and check all four trigger.
 - **Review:** every changeset goes to review in Tower before it is committed (the `tower-review` skill).
 - **Changelog and releases:** `CHANGELOG.md`, with the rules in `CLAUDE.md` under "Changelog and Releases".
-- **No README in a skill directory:** `skills add` copies everything in it into the install, so markers live in `SKILL.md` and `references/`, and the root `README.md` lists the skills. Update its entry if a skill's one-line summary changed, and record a retirement under its `### Retired` heading.
+- **No README or eval cases in a skill directory:** `skills add` and `gh skill install` copy everything in it into the install, so markers live in `SKILL.md` and `references/`, the root `README.md` lists the skills, and eval cases go in `plugins/<name>/evals/` (run them with `claude plugin eval plugins/<name>`). Update a skill's README entry if a skill's one-line summary changed, and record a retirement under its `### Retired` heading.
 
 ## Past refreshes worth copying
 

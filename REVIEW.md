@@ -9,7 +9,9 @@ This repo is a collection of agent skills: Markdown instructions that agents fol
 - **One tool version, pinned in several places.** prek appears in `prek.toml` (`minimum_prek_version`), in `pyproject.toml` (the `dev` group), in `uv.lock`, and in the pinned `prek-action` in `.github/workflows/ci.yml`. A change to one must agree with the others: a raised minimum with a stale pin breaks `uv run prek` while CI and a Homebrew prek still pass.
 - **prek commands must select the stage.** The lint, type, validation and link hooks are declared `stages = ["pre-push"]`. A `prek run … <hook ids>` without `--hook-stage pre-push`, in CI, docs or a skill, runs none of them, prints nothing and exits 0. Flag any such command.
 - **CI runs hooks by id.** `.github/workflows/ci.yml` lists the hook ids it runs, and `CLAUDE.md` repeats the list. A hook added to or renamed in `prek.toml` without the same id in both runs only locally, or not at all. Flag a mismatch.
-- **Project skills stay unpublished.** Skills under `.agents/skills/` maintain this repo. Each needs `metadata: {internal: "true"}` in its frontmatter, quoted (the spec's `metadata` values are strings), or `skills add` offers it to anyone installing from the repo. The `skills` CLI scans `.agents/` and `.claude/`, so the location alone does not hide it. The exception is a symlink to a published top-level skill (`.agents/skills/refresh-skill`), which has no flag and is listed once.
+- **Project skills stay unpublished.** Skills under `.agents/skills/` maintain this repo. Each needs `metadata: {internal: "true"}` in its frontmatter, quoted (the spec's `metadata` values are strings), or `skills add` offers it to anyone installing from the repo. The `skills` CLI scans `.agents/` and `.claude/`, so the location alone does not hide it. The exception is a symlink to a published skill (`.agents/skills/refresh-skill`), which has no flag and is listed once.
+- **Eval cases stay out of the skill folder.** A published skill is `plugins/<name>/skills/<name>/`, and its cases go in `plugins/<name>/evals/`. `gh skill install` and `skills add` copy the skill folder whole, so an `evals/` inside it ships graders and prompts to every user. Flag one.
+- **A moved skill breaks existing installs.** Both CLIs find an installed skill by its path in this repo. Flag a PR that moves or renames a skill folder without a `CHANGELOG.md` entry telling users to reinstall.
 
 ## Skill content
 
@@ -21,7 +23,7 @@ This repo is a collection of agent skills: Markdown instructions that agents fol
 
 ## Test cases
 
-- `evals/` folders hold skill-creator test cases in the format `claude plugin eval` reads. Their `prompt.md` and grader files open with a settings block, not a heading, so markdownlint skips them on purpose.
+- `plugins/<name>/evals/` folders hold skill-creator test cases in the format `claude plugin eval` reads. Their `prompt.md` and grader files open with a settings block, not a heading, so markdownlint skips them on purpose.
 - A grader must not pin an upstream version that will move, such as "the marker reads v0.33.0". A correct run after the next release would fail it.
 
 ## Ignore

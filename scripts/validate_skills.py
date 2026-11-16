@@ -162,9 +162,10 @@ def is_skill(path: Path) -> bool:
 
 
 def skill_directories() -> list[Path]:
-    """Published skills at the repo root, then the project skills in `.agents/skills/`."""
-    roots = [REPO_ROOT, PROJECT_SKILLS_DIR] if PROJECT_SKILLS_DIR.is_dir() else [REPO_ROOT]
-    skills = [skill for root in roots for skill in sorted(filter(is_skill, root.iterdir()))]
+    """Published skills in `plugins/<plugin>/skills/`, then the project skills in `.agents/skills/`."""
+    published = sorted(REPO_ROOT.glob("plugins/*/skills/*"))
+    project = sorted(PROJECT_SKILLS_DIR.iterdir()) if PROJECT_SKILLS_DIR.is_dir() else []
+    skills = [*filter(is_skill, published), *filter(is_skill, project)]
     if not skills:
         raise SystemExit("No skill directories with SKILL.md were found.")
     return skills
