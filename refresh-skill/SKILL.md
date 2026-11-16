@@ -124,7 +124,7 @@ These check format, not behaviour. For a refresh that rewrites advice, the behav
 
 Two things keep the comparison honest:
 
-- **Hand each run only the skill file under test, and load no skill through a Skill tool.** An installed copy of the same skill would otherwise load into both runs and erase the difference being measured.
+- **Hand each run its own copy of the skill version under test, `references/` and scripts included, outside the checkout, and load no skill through a Skill tool.** A run that reads the working checkout sees the refreshed references whichever version it was given, and an installed copy of the same skill would load into both runs. Either erases the difference being measured.
 - **Pick prompts where the old advice was wrong or silent.** A case both versions pass shows nothing.
 
 ## 8. Commit
