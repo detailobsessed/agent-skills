@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2026.11.16.3] - 2026-11-16
+
 ### Changed
 
 - **diataxis**: another document no longer counts as evidence when checking accuracy. A page that disagrees with a skill or a second page is checked, with the other document, against the code, config or live system before either is called wrong. Every fact added or moved gets that check too, even when it comes from a sibling document.
@@ -136,7 +138,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **git-spice** and **wise-mcp**: the first published skills.
 
-[unreleased]: https://github.com/detailobsessed/agent-skills/compare/2026.11.16.1...HEAD
+[unreleased]: https://github.com/detailobsessed/agent-skills/compare/2026.11.16.3...HEAD
+[2026.11.16.3]: https://github.com/detailobsessed/agent-skills/compare/2026.11.16.2...2026.11.16.3
 [2026.11.16.2]: https://github.com/detailobsessed/agent-skills/compare/2026.11.16.1...2026.11.16.2
 [2026.11.16.1]: https://github.com/detailobsessed/agent-skills/compare/2026.11.16...2026.11.16.1
 [2026.11.16]: https://github.com/detailobsessed/agent-skills/compare/2026.11.15...2026.11.16
