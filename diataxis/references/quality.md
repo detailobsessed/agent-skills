@@ -20,7 +20,7 @@ diataxis.fr distinguishes two kinds of quality.
 
 diataxis.fr is direct about this: Diátaxis **cannot address functional quality**. Accuracy and completeness come from skill, knowledge of the domain and attention to detail.
 
-What it can do for functional quality is *expose* lapses. Making reference mirror the structure of the code makes its gaps visible; moving explanation out of a tutorial often reveals a step the reader was left to work out alone.
+What it can do for functional quality is *expose* lapses. Its example: making reference mirror the structure of the code makes the reference's gaps visible.
 
 For deep quality it does more. Its modes are built around user needs, so placing material in the right mode helps it fit those needs. And it protects flow, by keeping, say, a digression into explanation from breaking up a how-to guide.
 

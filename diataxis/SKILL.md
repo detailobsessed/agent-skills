@@ -37,7 +37,7 @@ When it is unclear what kind of documentation something is, or should be, ask tw
 | informs cognition (knowing) | application of skill (work) | reference |
 | informs cognition (knowing) | acquisition of skill (study) | explanation |
 
-Apply it at any scale: a whole page, a section, a paragraph, a single sentence. When the parts of a page give different answers, the page mixes modes, and that is the usual source of trouble. Trust the compass over first impressions, which diataxis.fr warns are often wrong. [references/compass.md](references/compass.md) covers the two confusions it settles most often (tutorial against how-to guide, reference against explanation) and how neighbouring modes blur.
+Apply it at any scale: a whole page, a section, a paragraph, a single sentence. When the parts of a page give different answers, the page mixes modes, and that is the usual source of trouble. Trust the compass over first impressions: diataxis.fr warns that intuition sometimes gives an immediate answer that is wrong. [references/compass.md](references/compass.md) covers the two confusions it settles most often (tutorial against how-to guide, reference against explanation) and how neighbouring modes blur.
 
 ## Writing in each mode
 
