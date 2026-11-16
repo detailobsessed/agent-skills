@@ -1,0 +1,10 @@
+{
+  "name": "wise-mcp",
+  "description": "Design judgment for MCP servers built with FastMCP: what makes tools, outputs, errors, state and auth work for the agent calling them.",
+  "author": {
+    "name": "detailobsessed"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/detailobsessed/agent-skills",
+  "homepage": "https://github.com/detailobsessed/agent-skills"
+}

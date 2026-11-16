@@ -1,0 +1,10 @@
+{
+  "name": "refresh-skill",
+  "description": "Brings an agent skill you maintain up to date with its tool's releases, its product's docs, or the premises under its own advice.",
+  "author": {
+    "name": "detailobsessed"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/detailobsessed/agent-skills",
+  "homepage": "https://github.com/detailobsessed/agent-skills"
+}

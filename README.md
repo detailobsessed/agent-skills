@@ -2,7 +2,7 @@
 
 [![skills.sh](https://skills.sh/b/detailobsessed/agent-skills)](https://skills.sh/detailobsessed/agent-skills)
 [![CI](https://github.com/detailobsessed/agent-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/detailobsessed/agent-skills/actions/workflows/ci.yml)
-[![Latest release](https://img.shields.io/github/v/release/detailobsessed/agent-skills?sort=semver)](https://github.com/detailobsessed/agent-skills/releases/latest)
+[![Latest release](https://img.shields.io/github/v/release/detailobsessed/agent-skills?sort=date)](https://github.com/detailobsessed/agent-skills/releases/latest)
 [![License: MIT](https://img.shields.io/github/license/detailobsessed/agent-skills)](LICENSE)
 
 My personal collection of [agent skills](https://skills.sh/) I created and maintain.
@@ -63,7 +63,7 @@ A plain `prek install` sets up only the `pre-push` hook (`default_install_hook_t
 
 ## Skills
 
-Each skill directory holds only what an agent reads: `skills add` copies the whole directory into every install. Notes for people browsing the repo live here instead. All skills are MIT-licensed ([LICENSE](LICENSE)).
+Each skill lives in `plugins/<name>/skills/<name>/` and holds only what an agent reads: `skills add` and `gh skill install` copy the whole folder into every install. Its eval cases sit beside it in `plugins/<name>/evals/`, so installs don't carry them. Notes for people browsing the repo live here instead. All skills are MIT-licensed ([LICENSE](LICENSE)).
 
 ### `diataxis`
 
@@ -99,7 +99,7 @@ npx skills add https://github.com/detailobsessed/agent-skills --skill step-dev
 
 ### `wise-mcp`
 
-Design judgment for MCP servers built with [FastMCP](https://github.com/PrefectHQ/fastmcp): what makes tools, outputs, errors, state and auth work for the agent calling them. Drawn from the MCP spec, client docs, measured studies and practitioner catalogs, each listed with the date it was last checked in [`references/sources.md`](wise-mcp/references/sources.md). Pairs with FastMCP's own `fastmcp-server` skill for the API.
+Design judgment for MCP servers built with [FastMCP](https://github.com/PrefectHQ/fastmcp): what makes tools, outputs, errors, state and auth work for the agent calling them. Drawn from the MCP spec, client docs, measured studies and practitioner catalogs, each listed with the date it was last checked in [`references/sources.md`](plugins/wise-mcp/skills/wise-mcp/references/sources.md). Pairs with FastMCP's own `fastmcp-server` skill for the API.
 
 ```bash
 npx skills add https://github.com/detailobsessed/agent-skills --skill wise-mcp
@@ -111,21 +111,21 @@ npx skills add https://github.com/detailobsessed/agent-skills --skill wise-mcp
 
 ## Updating a skill
 
-Refreshing a skill against a new upstream release, or retiring it, follows the published [`refresh-skill`](refresh-skill/SKILL.md), with what it leaves to each repo in [`docs/maintaining-skills.md`](docs/maintaining-skills.md).
+Refreshing a skill against a new upstream release, or retiring it, follows the published [`refresh-skill`](plugins/refresh-skill/skills/refresh-skill/SKILL.md), with what it leaves to each repo in [`docs/maintaining-skills.md`](docs/maintaining-skills.md).
 
 ## Adding a new skill
 
 The preferred workflow here is:
 
-1. Create the skill scaffold:
+1. Create the plugin and the skill scaffold inside it:
 
     ```bash
-    skills init my-skill
+    mkdir -p plugins/my-skill/skills && cd plugins/my-skill/skills && skills init my-skill
     ```
 
 2. Replace the generated `SKILL.md` with the real skill content
 
-3. Add any supporting `references/`, assets, or additional files the skill needs
+3. Add any supporting `references/`, assets, or additional files the skill needs, and `plugins/my-skill/.claude-plugin/plugin.json` (copy another plugin's and change `name` and `description`). Eval cases go in `plugins/my-skill/evals/`, never inside the skill folder.
 
 4. Run repository validation from the root:
 

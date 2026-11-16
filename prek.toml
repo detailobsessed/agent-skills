@@ -72,7 +72,8 @@ hooks = [
   },
 ]
 
-# The Agent Skills spec. `check .` skips dot-directories, so the project skills get a run of their own.
+# The Agent Skills spec: the published skills under plugins/, then the project skills in .agents/skills/.
+# Eval cases sit beside each plugin's skills/, not inside a skill, so no --allow-dirs is needed.
 # It exits 2 on a warning, so a warning fails the push too.
 [[repos]]
 repo = "https://github.com/agent-ecosystem/skill-validator"
@@ -81,7 +82,7 @@ hooks = [
   {
     id = "skill-validator",
     name = "skill-validator (published skills)",
-    args = ["check", ".", "--allow-dirs=evals"],
+    args = ["check", "plugins"],
     pass_filenames = false,
     always_run = true,
     stages = ["pre-push"],
@@ -91,7 +92,7 @@ hooks = [
     id = "skill-validator",
     alias = "skill-validator-project",
     name = "skill-validator (project skills)",
-    args = ["check", ".agents/skills", "--allow-dirs=evals"],
+    args = ["check", ".agents/skills"],
     pass_filenames = false,
     always_run = true,
     stages = ["pre-push"],

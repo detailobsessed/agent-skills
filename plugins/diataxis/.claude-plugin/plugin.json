@@ -1,0 +1,10 @@
+{
+  "name": "diataxis",
+  "description": "Writes, reviews and restructures project documentation the way Diátaxis is described at diataxis.fr, one small, publishable change at a time.",
+  "author": {
+    "name": "detailobsessed"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/detailobsessed/agent-skills",
+  "homepage": "https://github.com/detailobsessed/agent-skills"
+}
