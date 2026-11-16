@@ -113,12 +113,26 @@ hooks = [
   }
 ]
 
-# CHANGELOG.md's Keep a Changelog structure: section names, ISO dates, version order.
-# .kacl.yml turns off its check for its own boilerplate sentences, which differ from ours.
+# CHANGELOG.md's Keep a Changelog structure: section names, ISO dates, CalVer versions in descending
+# order, a link for each version, the preamble naming Calendar Versioning. It replaced python-kacl,
+# whose semver-only check rejects a second release the same day (`2026.11.16.1`). The fork ships no
+# validate hook of its own, and `prek update` does not bump a local hook's pin: raise it by hand.
+# --strict turns ordering and missing links from warnings into errors; markdownlint owns formatting.
 [[repos]]
-repo = "https://gitlab.com/schmieder.matthias/python-kacl"
-rev = "v0.7.7"
-hooks = [{ id = "kacl-verify", priority = 1, stages = ["pre-push"] }]
+repo = "local"
+hooks = [
+  {
+    id = "changelog-validate",
+    name = "Keep a Changelog structure (keepachangelog-manager-fork)",
+    language = "python",
+    additional_dependencies = ["keepachangelog-manager-fork==6.10.1"],
+    entry = "changelogmanager validate --strict --no-format",
+    files = "^(CHANGELOG\\.md|pyproject\\.toml)$",
+    pass_filenames = false,
+    priority = 1,
+    stages = ["pre-push"]
+  }
+]
 
 [[repos]]
 repo = "https://github.com/lycheeverse/lychee"

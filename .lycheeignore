@@ -1,3 +1,3 @@
 # CHANGELOG.md's compare links point at the tag a release push creates, so they 404 until that push lands
-# and would block it. The release steps generate them, and kacl-verify checks the changelog's structure.
+# and would block it. The release steps generate them, and changelog-validate checks the changelog's structure.
 ^https://github\.com/detailobsessed/agent-skills/compare/

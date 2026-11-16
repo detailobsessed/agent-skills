@@ -20,7 +20,7 @@ Update this table when a skill is added, retired, or what it rests on changes.
 - **Validation:**
 
   ```bash
-  prek run --all-files --hook-stage pre-push skill-validator skill-validator-project skill-best-practices typos markdownlint kacl-verify ruff-check ruff-format ty
+  prek run --all-files --hook-stage pre-push skill-validator skill-validator-project skill-best-practices typos markdownlint changelog-validate ruff-check ruff-format ty
   prek run --all-files --hook-stage pre-push lychee   # links; not run in CI, so run it here
   ```
 

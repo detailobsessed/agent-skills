@@ -2,7 +2,7 @@
 
 All notable changes to the published skills are documented in this file. Each entry names the skill it changes. Changes to this repo's own tooling and project skills are left out.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions are release dates written as `YEAR.MONTH.DAY` without leading zeros, so they also parse as semantic versions, and there is at most one release per day.
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions follow [Calendar Versioning](https://calver.org/): the release date as `YEAR.MONTH.DAY` without leading zeros, with a counter appended for a further release the same day (`2026.11.16.1`).
 
 ## [Unreleased]
 

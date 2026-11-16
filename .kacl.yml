@@ -1,4 +1,0 @@
-# python-kacl (the kacl-verify hook in prek.toml). Its default check wants its own two intro
-# sentences, which name Keep a Changelog 1.0.0 and Semantic Versioning; ours name 1.1.0 and dated versions.
-kacl:
-  default_content: []
