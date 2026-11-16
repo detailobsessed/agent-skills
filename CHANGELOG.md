@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2026.11.16.2] - 2026-11-16
+
 ### Changed
 
 - **Breaking:** every skill (**diataxis**, **git-spice**, **refresh-skill**, **step-dev**, **wise-mcp**) moved to `plugins/<name>/skills/<name>/`, with its eval cases beside it in `plugins/<name>/evals/`, so an install no longer carries the graders and test prompts. `gh skill update` and `skills update` find an installed skill by its old path and now skip it without a message, so reinstall each skill once: `gh skill install detailobsessed/agent-skills <name> --force`, or `skills add https://github.com/detailobsessed/agent-skills --skill <name>`.
@@ -131,6 +133,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **git-spice** and **wise-mcp**: the first published skills.
 
 [unreleased]: https://github.com/detailobsessed/agent-skills/compare/2026.11.16.1...HEAD
+[2026.11.16.2]: https://github.com/detailobsessed/agent-skills/compare/2026.11.16.1...2026.11.16.2
 [2026.11.16.1]: https://github.com/detailobsessed/agent-skills/compare/2026.11.16...2026.11.16.1
 [2026.11.16]: https://github.com/detailobsessed/agent-skills/compare/2026.11.15...2026.11.16
 [2026.11.15]: https://github.com/detailobsessed/agent-skills/compare/2026.8.6...2026.11.15
