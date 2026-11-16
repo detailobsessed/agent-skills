@@ -5,65 +5,9 @@
 [![Latest release](https://img.shields.io/github/v/release/detailobsessed/agent-skills?sort=date)](https://github.com/detailobsessed/agent-skills/releases/latest)
 [![License: MIT](https://img.shields.io/github/license/detailobsessed/agent-skills)](LICENSE)
 
-My personal collection of [agent skills](https://skills.sh/) I created and maintain.
-
-This repository is intended to work directly with the `skills.sh` ecosystem and CLI.
-
-What changed in each skill, release by release, is in [CHANGELOG.md](CHANGELOG.md). Each release is a git tag named by its date, such as `2026.11.15`. `gh skill install` installs the latest release. With `skills`, pin one by adding it to the source: `skills add detailobsessed/agent-skills@2026.11.15 --skill git-spice`.
-
-## Using this repository with `skills`
-
-The installed CLI is available as either:
-
-```bash
-skills -h
-```
-
-or:
-
-```bash
-npx skills -h
-```
-
-For this repo, the most relevant commands are:
-
-```bash
-skills add https://github.com/detailobsessed/agent-skills --skill diataxis
-skills add https://github.com/detailobsessed/agent-skills --skill git-spice
-skills add https://github.com/detailobsessed/agent-skills --skill refresh-skill
-skills add https://github.com/detailobsessed/agent-skills --skill step-dev
-skills add https://github.com/detailobsessed/agent-skills --skill wise-mcp
-skills list
-skills find
-skills init my-skill
-```
-
-## Notes on authoring
-
-- `skills create` is **not** a valid command in the current CLI
-- `skills init <name>` creates `<name>/SKILL.md` and nothing else: frontmatter with `name` and `description`, plus a minimal instruction skeleton
-
-## Repository tooling
-
-Validation tooling is configured at the repository root:
-
-- `pyproject.toml` provides the shared Python tooling definition
-- `prek.toml` runs formatting and quality checks across all skills in the repo
-- Agent Skills spec validation runs through [skill-validator](https://github.com/agent-ecosystem/skill-validator), and `scripts/validate_skills.py` adds the best-practices rules it does not check yet
-
-This is intentional: spell-checking, dead-link checking, TOML validation, and related checks should apply consistently to every skill instead of being duplicated inside each skill directory.
-
-Run the skill validation for all current skills from the repo root with:
-
-```bash
-prek run --all-files --hook-stage pre-push skill-validator skill-validator-project skill-best-practices
-```
-
-A plain `prek install` sets up only the `pre-push` hook (`default_install_hook_types` in `prek.toml`), and that is where the checks that matter run.
+[Agent skills](https://skills.sh/) I write and maintain: instructions an AI coding agent loads when a task calls for them. Each one is kept up to date with the tool or method it describes.
 
 ## Skills
-
-Each skill lives in `plugins/<name>/skills/<name>/` and holds only what an agent reads: `skills add` and `gh skill install` copy the whole folder into every install. Its eval cases sit beside it in `plugins/<name>/evals/`, so installs don't carry them. Notes for people browsing the repo live here instead. All skills are MIT-licensed ([LICENSE](LICENSE)).
 
 ### `diataxis`
 
@@ -109,31 +53,45 @@ npx skills add https://github.com/detailobsessed/agent-skills --skill wise-mcp
 
 - **`macos-expert`** — removed 2026-08-06. [Axiom](https://github.com/CharlesWiltgen/Axiom)'s `axiom-macos` skill now covers the same ground (windows, menus, sandboxing, AppKit interop and modernization, distribution) and tracks macOS 26/27, where this skill stopped at macOS 15. Use Axiom instead. Recoverable from git history if the Shape A/B architectural triage is ever worth extracting on its own.
 
-## Updating a skill
+## Installing and updating
 
-Refreshing a skill against a new upstream release, or retiring it, follows the published [`refresh-skill`](plugins/refresh-skill/skills/refresh-skill/SKILL.md), with what it leaves to each repo in [`docs/maintaining-skills.md`](docs/maintaining-skills.md).
+Either CLI installs a skill:
 
-## Adding a new skill
+```bash
+npx skills add https://github.com/detailobsessed/agent-skills --skill <name>   # tracks main
+gh skill install detailobsessed/agent-skills <name>                             # installs the latest release
+```
 
-The preferred workflow here is:
+Update with `skills update` or `gh skill update`. If you installed a skill before release `2026.11.16.2`, install it again once: that release moved every skill to a new path, and both update commands skip an install whose path is gone without saying so.
 
-1. Create the plugin and the skill scaffold inside it:
+Each release is a git tag named by its date, such as `2026.11.15`, and [CHANGELOG.md](CHANGELOG.md) lists what changed in each skill. To pin one with `skills`, add the tag to the source: `skills add detailobsessed/agent-skills@2026.11.15 --skill git-spice`. With `gh`, append it to the skill: `gh skill install detailobsessed/agent-skills git-spice@2026.11.15`.
+
+All skills are MIT-licensed ([LICENSE](LICENSE)).
+
+## Working on this repo
+
+Each skill lives in `plugins/<name>/skills/<name>/` and holds only what an agent reads, because both CLIs copy the whole folder into every install. Its eval cases sit beside it in `plugins/<name>/evals/` and run with `claude plugin eval plugins/<name>`.
+
+Validation runs from the repo root through [`prek`](https://prek.j178.dev): [skill-validator](https://github.com/agent-ecosystem/skill-validator) checks the Agent Skills spec, `scripts/validate_skills.py` adds the best-practices rules it lacks, and typos, markdownlint, ruff, ty, the changelog check and lychee cover the rest.
+
+```bash
+uv sync --locked --group dev
+prek run --all-files
+prek run --all-files --hook-stage pre-push
+```
+
+The second run is the one that matters: those checks are pre-push hooks, and `prek run` without `--hook-stage pre-push` skips them silently. A plain `prek install` sets up only the `pre-push` hook (`default_install_hook_types` in `prek.toml`).
+
+To add a skill:
+
+1. Create the plugin and the skill scaffold inside it. `skills init <name>` writes `<name>/SKILL.md` with starter frontmatter and nothing else (there is no `skills create`).
 
     ```bash
     mkdir -p plugins/my-skill/skills && cd plugins/my-skill/skills && skills init my-skill
     ```
 
-2. Replace the generated `SKILL.md` with the real skill content
+2. Replace the generated `SKILL.md` with the real skill content.
+3. Add any supporting `references/` or assets the skill needs, and `plugins/my-skill/.claude-plugin/plugin.json` (copy another plugin's and change `name` and `description`). Eval cases go in `plugins/my-skill/evals/`, never inside the skill folder.
+4. Run the validation above, and commit in small, reviewable steps.
 
-3. Add any supporting `references/`, assets, or additional files the skill needs, and `plugins/my-skill/.claude-plugin/plugin.json` (copy another plugin's and change `name` and `description`). Eval cases go in `plugins/my-skill/evals/`, never inside the skill folder.
-
-4. Run repository validation from the root:
-
-    ```bash
-    prek run --all-files
-    prek run --all-files --hook-stage pre-push
-    ```
-
-    The second run is the one that matters: typos, markdownlint, ruff, ty, the validators and lychee are pre-push hooks, and `prek run` without `--hook-stage pre-push` skips them silently.
-
-5. Commit the change in small, reviewable steps
+Refreshing a skill against a new upstream release, or retiring it, follows the published [`refresh-skill`](plugins/refresh-skill/skills/refresh-skill/SKILL.md), with what it leaves to each repo in [`docs/maintaining-skills.md`](docs/maintaining-skills.md).
