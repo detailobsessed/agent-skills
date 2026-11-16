@@ -1,0 +1,12 @@
+# A how-to guide carrying the full settings table (half of it duplicated in configuration.md, half
+# found nowhere else) and a paragraph of explanation. Tests the split, and that no true fact is lost.
+schema_version: "1.1"
+name: mixed-howto-reference
+context:
+  scaffold_script: place-files.sh
+expected_outcome: |
+  The agent identifies backups.md as a how-to guide that carries a reference table and a section of
+  explanation. It proposes moving the full settings table to reference, keeping in the guide only
+  what the nightly-backup task needs and linking the rest, and accounts for every row: four already
+  in configuration.md, four that must be added there. The explanation is kept, moved or linked, not
+  deleted. Nothing is changed before the user approves.

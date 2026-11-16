@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **diataxis**: new skill for writing, reviewing and restructuring project documentation the way diataxis.fr describes it. It works one small improvement at a time instead of imposing a tutorials/how-to/reference/explanation layout, uses the compass to classify content down to a single sentence, and gives a writing guide for each of the four modes plus troubleshooting, FAQ, migration guides and mixed pages. It proposes each change and waits for approval, reports gaps as observations rather than creating empty pages, keeps every true fact when moving material, brings each removal of wrong or duplicated content to the user as a decision, and updates the docs tool's navigation only to follow the content.
+
 ## [2026.11.16] - 2026-11-16
 
 ### Added
