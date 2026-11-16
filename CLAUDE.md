@@ -19,7 +19,7 @@ uv run python scripts/validate_skills.py
 
 # Run all pre-push checks (validation + typos + markdown lint + changelog format + python lint/type), the same list CI runs.
 # --hook-stage pre-push is required: these hooks are pre-push only, and without it prek runs nothing and exits 0.
-prek run --all-files --hook-stage pre-push skill-validator skill-validator-project skill-best-practices typos markdownlint kacl-verify ruff-check ruff-format ty
+prek run --all-files --hook-stage pre-push skill-validator skill-validator-project skill-best-practices typos markdownlint changelog-validate ruff-check ruff-format ty
 
 # Run the full suite: pre-commit builtins, then every pre-push hook including lychee link checking
 prek run --all-files && prek run --all-files --hook-stage pre-push
@@ -40,7 +40,7 @@ This repo uses `prek` (Rust-based git hook framework). `prek install` installs o
 
 ## CI
 
-GitHub Actions runs on PR and push to main: syncs deps, then runs `prek` with `skill-validator skill-validator-project skill-best-practices typos markdownlint kacl-verify ruff-check ruff-format ty`. The `lychee` link checker is configured in `prek.toml` but not run in CI.
+GitHub Actions runs on PR and push to main: syncs deps, then runs `prek` with `skill-validator skill-validator-project skill-best-practices typos markdownlint changelog-validate ruff-check ruff-format ty`. The `lychee` link checker is configured in `prek.toml` but not run in CI.
 
 ## PRs or main
 
@@ -50,7 +50,7 @@ Open a PR (via `git-spice branch submit`) for a change to the tooling (`prek.tom
 
 `CHANGELOG.md` follows Keep a Changelog 1.1.0 and lists changes to the published skills only, never tooling or project skills. A commit that changes a skill's advice adds its entry under `Unreleased` (REVIEW.md says what an entry needs).
 
-A release is a dated tag, `YEAR.MONTH.DAY` with no leading zeros (`2026.3.6`, not `2026.03.06`, which is not a valid semantic version), at most one a day. Cut one on `main` the same day a merge leaves entries under `Unreleased`: `gh skill install` resolves to the latest release, not `main`, so a fix that is merged but not released never reaches its users. `gh skill publish` would create the release too, but only with auto-generated notes, so use `gh release create`:
+A release is a dated tag, `YEAR.MONTH.DAY` with no leading zeros (`2026.3.6`, not `2026.03.06`). A further release the same day appends a counter, `2026.3.6.1`, then `2026.3.6.2`, as yt-dlp does. A four-part tag is not semver, which is fine because nothing we depend on sorts tags as semver: `gh skill install` takes the latest GitHub release and the `skills` CLI reads `main`. Cut one on `main` the same day a merge leaves entries under `Unreleased`: `gh skill install` resolves to the latest release, not `main`, so a fix that is merged but not released never reaches its users. `gh skill publish` would create the release too, but only with auto-generated notes, so use `gh release create`:
 
 1. In `CHANGELOG.md`, rename `## [Unreleased]` to `## [<version>] - <YYYY-MM-DD>`, add an empty `## [Unreleased]` above it, and update the compare links at the bottom. Commit `docs(changelog): release <version>` to `main` after the Tower review.
 2. `git tag <version> && git push origin main <version>`
