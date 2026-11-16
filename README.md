@@ -15,19 +15,19 @@ What changed in each skill, release by release, is in [CHANGELOG.md](CHANGELOG.m
 
 The installed CLI is available as either:
 
-```bash path=null start=null
+```bash
 skills -h
 ```
 
 or:
 
-```bash path=null start=null
+```bash
 npx skills -h
 ```
 
 For this repo, the most relevant commands are:
 
-```bash path=null start=null
+```bash
 skills add https://github.com/detailobsessed/agent-skills --skill git-spice
 skills add https://github.com/detailobsessed/agent-skills --skill refresh-skill
 skills add https://github.com/detailobsessed/agent-skills --skill step-dev
@@ -40,10 +40,7 @@ skills init my-skill
 ## Notes on authoring
 
 - `skills create` is **not** a valid command in the current CLI
-- `skills init <name>` creates a new directory containing only a starter `SKILL.md`
-- In a throwaway test under `/tmp`, `skills init test-skill` created:
-  - `test-skill/SKILL.md`
-- That starter file includes frontmatter with `name` and `description`, plus a minimal instruction skeleton
+- `skills init <name>` creates `<name>/SKILL.md` and nothing else: frontmatter with `name` and `description`, plus a minimal instruction skeleton
 
 ## Repository tooling
 
@@ -57,20 +54,11 @@ This is intentional: spell-checking, dead-link checking, TOML validation, and re
 
 Run the skill validation for all current skills from the repo root with:
 
-```bash path=null start=null
+```bash
 prek run --all-files --hook-stage pre-push skill-validator skill-validator-project skill-best-practices
 ```
 
-If GitButler is managing `pre-commit`, prefer leaving that hook in place and using `prek` primarily for `pre-push`. This repo is configured so a plain `prek install` installs only `pre-push` by default, which avoids overwriting a custom or GitButler-managed `pre-commit` hook.
-
-This repo also has a local chained `pre-commit` setup in `.git/hooks` so we do not forget how it works:
-
-- `pre-commit` is a local wrapper
-- `pre-commit-gitbutler` preserves the GitButler workspace-protection hook
-- `pre-commit-prek` preserves the `prek` pre-commit launcher
-- the wrapper runs GitButler first, then `prek`
-
-If `pre-commit` gets replaced by a future explicit `prek install --hook-type pre-commit`, restore the wrapper instead of treating `pre-commit.legacy` as the long-term source of truth.
+A plain `prek install` sets up only the `pre-push` hook (`default_install_hook_types` in `prek.toml`), and that is where the checks that matter run.
 
 ## Skills
 
@@ -122,7 +110,7 @@ The preferred workflow here is:
 
 1. Create the skill scaffold:
 
-    ```bash path=null start=null
+    ```bash
     skills init my-skill
     ```
 
@@ -132,7 +120,7 @@ The preferred workflow here is:
 
 4. Run repository validation from the root:
 
-    ```bash path=null start=null
+    ```bash
     prek run --all-files
     prek run --all-files --hook-stage pre-push
     ```

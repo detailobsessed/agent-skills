@@ -36,7 +36,7 @@ Any top-level directory (not starting with `.`) that contains a `SKILL.md` file 
 
 ## Hook Setup
 
-This repo uses `prek` (Rust-based git hook framework). `prek install` installs only `pre-push` by default to avoid conflicting with GitButler's `pre-commit` hook. The `.git/hooks/pre-commit` is a local wrapper that chains GitButler's hook with prek — don't overwrite it.
+This repo uses `prek` (Rust-based git hook framework). `prek install` installs only `pre-push` by default (`default_install_hook_types` in `prek.toml`). This machine's `.git/hooks/pre-commit` is a local wrapper that runs prek's pre-commit hooks.
 
 ## CI
 
