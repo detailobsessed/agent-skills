@@ -4,6 +4,8 @@ My personal collection of [agent skills](https://skills.sh/) I created and maint
 
 This repository is intended to work directly with the `skills.sh` ecosystem and CLI.
 
+What changed in each skill, release by release, is in [CHANGELOG.md](CHANGELOG.md). Each release is a git tag named by its date, such as `2026.11.15`. `gh skill install` installs the latest release. With `skills`, pin one by adding it to the source: `skills add detailobsessed/agent-skills@2026.11.15 --skill git-spice`.
+
 ## Using this repository with `skills`
 
 The installed CLI is available as either:
@@ -22,6 +24,7 @@ For this repo, the most relevant commands are:
 
 ```bash path=null start=null
 skills add https://github.com/detailobsessed/agent-skills --skill git-spice
+skills add https://github.com/detailobsessed/agent-skills --skill refresh-skill
 skills add https://github.com/detailobsessed/agent-skills --skill step-dev
 skills add https://github.com/detailobsessed/agent-skills --skill wise-mcp
 skills list
@@ -76,6 +79,14 @@ Driving [git-spice](https://abhinav.github.io/git-spice/), the stacked-branch CL
 npx skills add https://github.com/detailobsessed/agent-skills --skill git-spice
 ```
 
+### `refresh-skill`
+
+Bringing a skill you maintain up to date with what it rests on: a tool's releases, a product's docs, or its own design judgments and their premises. Fixes wrong advice before adding new material, verifies each claim by running it, accounts for every finding in the report, and retires the skill when a maintained one covers the same ground. The account-for-every-finding report comes from ElevenLabs' [`update-skills-from-changelog`](https://github.com/elevenlabs/skills/tree/main/.agents/skills/update-skills-from-changelog).
+
+```bash
+npx skills add https://github.com/detailobsessed/agent-skills --skill refresh-skill
+```
+
 ### `step-dev`
 
 Developing on the [Step](https://step.dev) unified automation platform — keyword development, the Keyword API, Automation Packages, and the CLI/CI-CD deployment path.
@@ -98,7 +109,7 @@ npx skills add https://github.com/detailobsessed/agent-skills --skill wise-mcp
 
 ## Updating a skill
 
-Refreshing a skill against a new upstream release, or retiring it, follows the repo-local project skill [`refresh-skill`](.agents/skills/refresh-skill/SKILL.md). It is marked `internal`, so `skills add` does not offer it with the other skills.
+Refreshing a skill against a new upstream release, or retiring it, follows the published [`refresh-skill`](refresh-skill/SKILL.md), with what it leaves to each repo in [`docs/maintaining-skills.md`](docs/maintaining-skills.md).
 
 ## Adding a new skill
 

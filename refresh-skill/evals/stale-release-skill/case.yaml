@@ -1,0 +1,12 @@
+# A repo other than this one, with none of its maintenance notes: the skill under test must find
+# what the stale skill rests on by itself.
+schema_version: "1.1"
+name: stale-release-skill
+context:
+  scaffold_script: place-files.sh
+expected_outcome: |
+  The git-spice skill, written against v0.28.0, is brought to the newest git-spice release after
+  reading the notes for every release in between. Advice those releases broke (commands gated
+  behind spice.experiment.*, the changed meaning of --restack) is corrected where it stands,
+  claims are checked by running git-spice, version-history markers are removed, and the report
+  accounts for every finding.
