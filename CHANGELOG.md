@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2026.11.16.1] - 2026-11-16
+
 ### Added
 
 - **diataxis**: new skill for writing, reviewing and restructuring project documentation the way diataxis.fr describes it. It works one small improvement at a time instead of imposing a tutorials/how-to/reference/explanation layout, uses the compass to classify content down to a single sentence, and gives a writing guide for each of the four modes plus troubleshooting, FAQ, migration guides and mixed pages. It proposes each change and waits for approval, reports gaps as observations rather than creating empty pages, keeps every true fact when moving material, brings each removal of wrong or duplicated content to the user as a decision, and updates the docs tool's navigation only to follow the content.
@@ -124,7 +126,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **git-spice** and **wise-mcp**: the first published skills.
 
-[unreleased]: https://github.com/detailobsessed/agent-skills/compare/2026.11.16...HEAD
+[unreleased]: https://github.com/detailobsessed/agent-skills/compare/2026.11.16.1...HEAD
+[2026.11.16.1]: https://github.com/detailobsessed/agent-skills/compare/2026.11.16...2026.11.16.1
 [2026.11.16]: https://github.com/detailobsessed/agent-skills/compare/2026.11.15...2026.11.16
 [2026.11.15]: https://github.com/detailobsessed/agent-skills/compare/2026.8.6...2026.11.15
 [2026.8.6]: https://github.com/detailobsessed/agent-skills/compare/2026.7.29...2026.8.6
