@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2026.11.16] - 2026-11-16
+
 ### Added
 
 - **refresh-skill**: new skill for bringing a skill you maintain up to date with its tool's releases, its product's docs, or the premises under its own advice. It fixes wrong advice before adding anything, verifies each claim by running it, accounts for every finding in its report, and retires the skill when a maintained one covers the same ground.
@@ -118,7 +120,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **git-spice** and **wise-mcp**: the first published skills.
 
-[unreleased]: https://github.com/detailobsessed/agent-skills/compare/2026.11.15...HEAD
+[unreleased]: https://github.com/detailobsessed/agent-skills/compare/2026.11.16...HEAD
+[2026.11.16]: https://github.com/detailobsessed/agent-skills/compare/2026.11.15...2026.11.16
 [2026.11.15]: https://github.com/detailobsessed/agent-skills/compare/2026.8.6...2026.11.15
 [2026.8.6]: https://github.com/detailobsessed/agent-skills/compare/2026.7.29...2026.8.6
 [2026.7.29]: https://github.com/detailobsessed/agent-skills/compare/2026.5.16...2026.7.29
