@@ -34,6 +34,8 @@ Each `plugins/<name>/skills/<name>/` with a `SKILL.md` is a published skill, and
 
 A plugin holds one skill, its `.claude-plugin/plugin.json`, and its skill-creator cases in `plugins/<name>/evals/`, where `claude plugin eval plugins/<name>` finds them without a flag. The cases sit outside the skill folder because `gh skill install` and `skills add` both copy that folder whole, with no way to exclude a path. Don't move a skill again lightly: both CLIs find an installed skill by its path in this repo, so after a move existing installs stop updating, without a message, until they are reinstalled.
 
+To see what an install delivers, `gh skill install … --dir <scratch>` copies the skill into the scratch folder but still records it in the global `~/.agents/.skill-lock.json`, as `<name>/<name>` (gh 2.104.0). `skills list -g` then reports a skill with no folder behind it. Remove the entry after the test: `jq 'del(.skills["<name>/<name>"])'` on that file, through a temporary file.
+
 [skill-validator](https://github.com/agent-ecosystem/skill-validator) checks them against the spec, including the 5,000-token body budget, and exits non-zero on a warning as well as an error. It runs once on `plugins` and once on `.agents/skills`. `scripts/validate_skills.py` holds only the best-practices rules skill-validator lacks: third-person description, a "Use when" trigger, a contents heading in a reference over 100 lines, no time-sensitive wording, no reserved word in the name, no Windows-style paths. agent-ecosystem/skill-validator#108 asks for the first four. Drop each check once a pinned release reports it, and the script with its `skill-best-practices` hook along with the last.
 
 ## Hook Setup
