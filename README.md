@@ -28,6 +28,7 @@ npx skills -h
 For this repo, the most relevant commands are:
 
 ```bash
+skills add https://github.com/detailobsessed/agent-skills --skill diataxis
 skills add https://github.com/detailobsessed/agent-skills --skill git-spice
 skills add https://github.com/detailobsessed/agent-skills --skill refresh-skill
 skills add https://github.com/detailobsessed/agent-skills --skill step-dev
@@ -63,6 +64,14 @@ A plain `prek install` sets up only the `pre-push` hook (`default_install_hook_t
 ## Skills
 
 Each skill directory holds only what an agent reads: `skills add` copies the whole directory into every install. Notes for people browsing the repo live here instead. All skills are MIT-licensed ([LICENSE](LICENSE)).
+
+### `diataxis`
+
+Writing, reviewing and restructuring project documentation the way [Diátaxis](https://diataxis.fr) is described by its author, Daniele Procida: one small, publishable improvement at a time, the compass to tell tutorials, how-to guides, reference and explanation apart down to a single sentence, and a structure that grows from the content instead of four empty folders. Proposes every change before making it, and keeps each true fact when moving material. Works with any docs tool. It paraphrases diataxis.fr (CC BY-SA 4.0) and links each page it draws on.
+
+```bash
+npx skills add https://github.com/detailobsessed/agent-skills --skill diataxis
+```
 
 ### `git-spice`
 

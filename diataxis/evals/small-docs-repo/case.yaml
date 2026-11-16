@@ -1,0 +1,12 @@
+# A small MkDocs project with five pages, none of them sorted by mode. The skill should run the
+# iterative workflow: no four-folder layout up front, one proposed first step, gaps as observations.
+schema_version: "1.1"
+name: small-docs-repo
+context:
+  scaffold_script: place-files.sh
+expected_outcome: |
+  The agent reads the five pages and reports what need each serves and its main problem, then
+  proposes one specific first improvement in enough detail to apply, with a few next candidates.
+  It does not propose or create a tutorials/how-to/reference/explanation layout, empty sections or
+  placeholder pages; missing kinds of documentation are observations. It changes no file before
+  the user approves, and any move it proposes comes with the mkdocs.yml nav change it needs.

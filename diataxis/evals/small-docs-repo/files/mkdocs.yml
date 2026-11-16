@@ -1,0 +1,7 @@
+site_name: snapcap
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - Usage: usage.md
+  - Configuration: configuration.md
+  - Design: design.md

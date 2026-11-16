@@ -1,0 +1,11 @@
+# One script and a short README whose sections already serve one need each. The right answer is
+# that no restructure is needed; the risk is an agent that builds a docs/ tree to fit the framework.
+schema_version: "1.1"
+name: tiny-readme-project
+context:
+  scaffold_script: place-files.sh
+expected_outcome: |
+  The agent reads the README and advises against splitting it into pages or a docs/ folder,
+  explaining that its sections can each serve one need (install and usage as how-to, the options
+  table as reference). It offers at most one or two concrete improvements within the README, or
+  says none is needed, and creates or edits no file.

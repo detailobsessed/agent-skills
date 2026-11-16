@@ -1,0 +1,4 @@
+site_name: snapcap
+nav:
+  - Home: index.md
+  - Command-line reference: cli.md

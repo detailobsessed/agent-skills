@@ -1,0 +1,5 @@
+site_name: snapcap
+nav:
+  - Home: index.md
+  - Scheduled backups: backups.md
+  - Configuration: configuration.md

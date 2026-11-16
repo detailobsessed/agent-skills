@@ -1,0 +1,13 @@
+# A CLI reference page with two claims the code contradicts (a prune flag that does not exist, a
+# wrong Python minimum) and a recovery how-to wedged under `restore`. The request is about Diátaxis,
+# not accuracy, so the skill must check the facts anyway and bring each correction as a decision.
+schema_version: "1.1"
+name: wrong-claim
+context:
+  scaffold_script: place-files.sh
+expected_outcome: |
+  The agent checks cli.md against src/snapcap/cli.py and pyproject.toml, and reports that
+  `--keep-days` does not exist (prune takes `--keep-last`, default 7) and that the minimum Python
+  is 3.11, not 3.9, citing the files. It brings each correction to the user as a decision. It
+  identifies the disk-failure paragraph as a how-to guide inside reference and proposes moving it
+  with all its steps. Nothing is changed before the user approves.
