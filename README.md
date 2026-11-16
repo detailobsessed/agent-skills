@@ -1,5 +1,10 @@
 # agent-skills
 
+[![skills.sh](https://skills.sh/b/detailobsessed/agent-skills)](https://skills.sh/detailobsessed/agent-skills)
+[![CI](https://github.com/detailobsessed/agent-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/detailobsessed/agent-skills/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/detailobsessed/agent-skills?sort=semver)](https://github.com/detailobsessed/agent-skills/releases/latest)
+[![License: MIT](https://img.shields.io/github/license/detailobsessed/agent-skills)](LICENSE)
+
 My personal collection of [agent skills](https://skills.sh/) I created and maintain.
 
 This repository is intended to work directly with the `skills.sh` ecosystem and CLI.
