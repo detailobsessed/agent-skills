@@ -31,6 +31,8 @@ Even so, diataxis.fr says it offers principles, not a formula. It cannot replace
 This section is this skill's own. Since Diátaxis cannot check facts, check them separately whenever you assess a piece of documentation:
 
 - Compare each command, flag, option, default, path, version and limit the text states with the code, configuration, CLI help or tests. Run a command when it is safe and cheap to run.
+- Another document is not evidence. When a page disagrees with a skill, a second page or a wiki, that shows only that the two disagree: check both against the code, config or live system before calling either one wrong, outdated or incomplete.
+- Every fact you add, move or reword gets the same check, even when it comes from another document in the same repo. A fact copied unchecked from a sibling doc carries that doc's errors onto the new page.
 - Record the evidence for each discrepancy: file and line, config value, or command and output.
 - Bring each correction or removal to the user as a decision, with that evidence, in the proposal's "Removals, for decision" list.
 - If a claim cannot be checked (behaviour on a platform you cannot run, an external service), mark it unverified and leave it in place.

@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **diataxis**: another document no longer counts as evidence when checking accuracy. A page that disagrees with a skill or a second page is checked, with the other document, against the code, config or live system before either is called wrong. Every fact added or moved gets that check too, even when it comes from a sibling document.
+
 ## [2026.11.16.2] - 2026-11-16
 
 ### Changed
